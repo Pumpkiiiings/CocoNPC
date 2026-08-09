@@ -1,0 +1,191 @@
+---
+title: Configuration
+description: Every file CocoNPC writes to plugins/CocoNPC, and what belongs in it.
+---
+
+## File layout
+
+```text
+plugins/CocoNPC/
+├── config.yml          # plugin settings
+├── messages.yml        # every message the plugin sends
+├── skins.yml           # cached per-limb texture URLs (shared by all NPCs)
+├── cooldowns.yml       # active per-player cooldowns
+├── npcs/               # one file per NPC, named by its id
+│   ├── 1.yml
+│   ├── 2.yml
+│   └── 7.yml
+├── menus/
+│   ├── npc_editor.yml
+│   └── hologram_editor.yml
+└── skins/              # drop your own .png skins here
+```
+
+<Callout type="warn">
+  `config.yml` contains your MineSkin API key. Never commit it or attach it to a bug
+  report without blanking that field.
+</Callout>
+
+---
+
+## config.yml
+
+```yaml
+mineskin:
+  # Required. Get one at https://mineskin.org/account
+  user-agent: "CocoNPC"
+  api-key: ""
+
+npc:
+  # How far away NPCs become visible, in blocks. Minimum 8.
+  view-distance: 48
+
+bedrock:
+  # Bedrock clients do not render Display entities, so NPCs are invisible to them.
+  # Their clicks are ignored by default.
+  block-interactions: true
+  # Tell them why, instead of nothing happening at all.
+  notify-blocked: true
+
+actions:
+  # When true, [require_money] BLOCKS the action if no economy provider
+  # is available, instead of silently letting it pass.
+  require-money-strict: true
+
+  # Characters stripped from expanded placeholders before [console] runs.
+  console-blocked-characters: [";", "|", "&"]
+```
+
+### mineskin.api-key
+
+Required for generating new skins. Set it with
+[`/coconpc setkey`](/docs/commands/setkey) or by editing this file and reloading.
+
+### npc.view-distance
+
+Also settable live with [`/coconpc viewdistance`](/docs/commands/viewdistance), which
+writes back here.
+
+### bedrock.block-interactions
+
+CocoNPC NPCs are built from Display entities, which Bedrock clients connecting through
+Geyser do not render. The NPC is simply not there for them.
+
+With this `true` (the default), a Bedrock player's clicks on an NPC do nothing — otherwise
+they would be collecting rewards by hitting empty air, which is both confusing and
+exploitable. Set it `false` if your Geyser setup does render them and you want Bedrock
+players to use NPCs normally.
+
+`bedrock.notify-blocked` controls whether they get told. The text is `BEDROCK_UNSUPPORTED`
+in `messages.yml`.
+
+Detection needs **Floodgate**. Without it, no player is ever identified as Bedrock and this
+setting has no effect.
+
+### actions.require-money-strict
+
+`[require_money]` reads its balance through PlaceholderAPI's Vault expansion. If that is
+not installed, there is no balance to compare. Leaving this `true` means the condition
+fails closed and the guarded action does not run. Setting it `false` lets the action
+through — which means anything behind a money check becomes free.
+
+### actions.console-blocked-characters
+
+Placeholders are expanded before `[console]` and `[player]` commands run, and some of what
+gets expanded is player-controlled. Any character listed here is removed from the expanded
+result.
+
+Control characters — newlines, carriage returns and the like — are **always** stripped
+regardless of this list, so they do not need to be listed. Whitespace is separately removed
+from substituted player names, which is what stops a Bedrock or nicknamed player appending
+arguments to your command.
+
+---
+
+## messages.yml
+
+Every string the plugin sends, including the prefix, errors and editor mode announcements.
+Missing keys are filled in with defaults on start, so you can delete a line to reset it.
+
+Messages use [MiniMessage](https://docs.advntr.dev/minimessage/format.html):
+
+```yaml
+PREFIX: "<dark_gray>[<yellow>CocoNPC<dark_gray>]<light_purple>! "
+NO_PERMISSION: "{prefix}<red>You do not have permission."
+SPAWNED_SUCCESS: "{prefix}<gray>Spawned in <yellow>{time} <gray>seconds."
+```
+
+`{prefix}` expands to your `PREFIX` value. Other `{...}` tokens are per-message and are
+documented by the default text around them.
+
+---
+
+## npcs/&lt;id&gt;.yml
+
+Everything about one NPC lives in one file, named after the id you gave it:
+
+```yaml
+uuid: 3f2b8c1a-...
+id: 1
+size: 1.0
+location:
+  world: world
+  x: 12.5
+  y: 64.0
+  z: -8.5
+  yaw: 180.0
+  pitch: 0.0
+skin:
+  head: aHR0cHM6...
+  body1: aHR0cHM6...
+parts:
+  right_leg1:
+    pitch: -90.0
+    yaw: 0.0
+    roll: 0.0
+    offset_x: 0.0
+    offset_y: 0.0
+    offset_z: 0.0
+    hidden: false
+hologram:
+  lines: ['<yellow>CocoNPC']
+  billboard: CENTER
+  shadow: true
+  background: transparent
+hands:
+  right: {}
+  left: {}
+actions:
+  - '[cooldown] 30s'
+  - '[message] <yellow>Hello, <player>!'
+```
+
+Editable by hand while the server is stopped, or with `/coconpc reload` afterwards.
+
+To move an NPC to another server, copy its one file across. To back one up before
+experimenting, copy it aside. Deleting the file removes the NPC.
+
+Ids are assigned from the highest file already present, so there is no counter to get out
+of step.
+
+<Callout type="info">
+  Before 1.1 an NPC was split across `CocoNPC.data` and `npcs.yml`, and every save rewrote
+  the whole file — editing one NPC wrote every NPC on the server. Those files are converted
+  automatically on first start and kept as `.bak`. Delete them once you are happy.
+</Callout>
+
+---
+
+## skins.yml
+
+The texture cache. Keys are base64 of the skin source; values are the eleven per-limb
+texture URLs. Purely derived data — deleting it costs you nothing but the time to
+regenerate, and every skin will need re-uploading.
+
+---
+
+## Menus
+
+`menus/npc_editor.yml` and `menus/hologram_editor.yml` control the GUI layouts: which item
+each button uses, its slot, its title and its lore. Changes apply the next time the GUI is
+opened after a reload.

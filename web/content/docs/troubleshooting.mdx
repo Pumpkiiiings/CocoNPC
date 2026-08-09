@@ -1,0 +1,155 @@
+---
+title: Troubleshooting
+description: Common failures, what causes them, and how to fix them.
+---
+
+## The plugin will not load
+
+**`Missing dependency packetevents`** — PacketEvents is a hard dependency. Install 2.13.0
+or newer into `plugins/`.
+
+**`Unsupported class file major version` / server will not start** — this is the *server's*
+Java requirement, not the plugin's. 1.21.x needs Java 21, 26.x needs Java 25. The plugin
+itself is built for Java 21 and loads on either. Check with `java -version`.
+
+**Server is older than 1.21** — not supported. CocoNPC is built against the 1.21 API and
+relies on Display entities and the Folia-style schedulers introduced around then.
+
+---
+
+## Skins
+
+### "Skin generation failed" on create
+
+Check the console for the underlying reason. The most common one:
+
+```text
+[CocoNPC] No MineSkin API key set. Skin generation will fail
+```
+
+Set a key with [`/coconpc setkey`](/docs/commands/setkey). Skins already cached in
+`skins.yml` keep working without one — only new skins fail.
+
+### The skin's arms look wrong
+
+Slim ("Alex") skins are converted to the classic layout automatically, based on sampling
+pixels that only a slim skin leaves transparent. A skin that is neither cleanly slim nor
+cleanly classic can confuse that check. Try re-exporting it as a standard 64×64 classic
+skin.
+
+### Spawning a new skin is slow
+
+Expected. Eleven textures have to be cropped and uploaded, and MineSkin rate-limits per
+key. Uploads are deliberately sequential — firing them in parallel just earns rate-limit
+errors. Run [`/coconpc preload`](/docs/commands/reload) ahead of time so the wait happens
+when you choose.
+
+### "The name entered does not belong to an account with a skin"
+
+The name was treated as a premium player name and Mojang returned nothing. Check the
+spelling, or pass a texture URL or local `.png` filename instead.
+
+---
+
+## NPCs
+
+### An NPC is invisible
+
+- Are you within the view distance? Check with
+  [`/coconpc viewdistance`](/docs/commands/viewdistance).
+- Is the part hidden? Right-clicking a part in the editor toggles its visibility. Open the
+  editor and right-click it again, or run `/coconpc pose <id> stand`.
+- Is it in another world? `/coconpc list` shows coordinates; `/coconpc tp <id>` takes you
+  there.
+
+### `/kill @e` did not remove it, and selectors cannot find it
+
+Working as designed. NPCs are packet-only and are not world entities, so no command
+selector can see them. Use [`/coconpc delete <id>`](/docs/commands/delete).
+
+This also means NPCs cannot be destroyed by a stray kill command, a chunk wipe, or a
+rollback.
+
+### Bedrock players cannot see or use NPCs
+
+Expected, and not fixable from this plugin's side. NPCs are Display entities, which Bedrock
+clients connecting through Geyser do not render.
+
+Because they cannot see them, their clicks are ignored by default rather than handing out
+rewards for hitting nothing. They get a message explaining why. Both behaviours are
+configurable under `bedrock:` in [Configuration](/docs/configuration), and detection
+requires Floodgate to be installed.
+
+### Leftover NPC parts from an old version
+
+Versions before the packet engine spawned real Display entities. Those are found and
+removed automatically as chunks load, so just visit the area once.
+
+---
+
+## Actions
+
+### An action prints `{player}` literally
+
+`{player}` is not a placeholder. Use `<player>` or `%player_name%`.
+
+### Nothing happens past a certain point in the list
+
+A **condition** failed and stopped the chain. Check `[cooldown]`, `[require_permission]`
+and `[require_money]` entries with `/coconpc action <id> list`.
+
+### `[require_money]` always blocks
+
+It reads `%vault_eco_balance%`, so it needs PlaceholderAPI **and** the Vault expansion.
+Without them it fails closed by design; the console says so. See
+`actions.require-money-strict` in [Configuration](/docs/configuration).
+
+### "Unknown action tag"
+
+The tag has no processor. Valid names are listed in
+[`/coconpc action`](/docs/commands/action). Note the network transfer tag is `[server]` —
+`connect` is accepted when adding, but stored as `[server]`.
+
+### A console action ran with mangled arguments
+
+Whitespace is stripped out of substituted player names, and the characters in
+`actions.console-blocked-characters` are removed from expanded placeholders. That is a
+deliberate guard against a crafted name appending arguments to your command. Anything
+stripped is logged.
+
+---
+
+### NPCs are invisible on a very new Minecraft version
+
+NPCs are drawn by writing entity metadata fields by index. Those indices have been stable
+from 1.21 through 26.2 and are verified against both ends of that range, but Mojang can
+shift them in a future update — a body part would then render with the wrong field, or not
+at all.
+
+If that happens after a Minecraft update, it needs a plugin update, not a config change.
+Check that PacketEvents also supports the new version.
+
+## Performance
+
+### Lag with many NPCs
+
+NPCs cost no entity ticks, but visibility is still recomputed as players move. If a lot of
+NPCs sit in one busy area, lower `npc.view-distance`.
+
+### Commands do not work from console
+
+By design — they need a player position and a player inventory. `execute as <player> run`
+does not help, because Paper keeps the console as the sender.
+
+---
+
+## Still stuck?
+
+Ask on the [CocoNPC Discord](https://discord.gg/ydsUw5UJrB).
+
+Bring the relevant lines from `logs/latest.log`, your server version, and your PacketEvents
+version — those three answer most questions immediately.
+
+<Callout type="warn">
+  Never paste `config.yml` as-is: it holds your MineSkin API key. Blank that line first.
+</Callout>

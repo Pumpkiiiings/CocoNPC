@@ -1,0 +1,164 @@
+---
+title: Action Engine
+description: Bind clicks to messages, commands, economy checks, cooldowns and server transfers.
+---
+
+An NPC's actions are an ordered list. When a player clicks the NPC, CocoNPC walks the list
+top to bottom. Most entries *do* something; a few are **conditions** that decide whether
+the walk continues.
+
+```bash
+/coconpc action <id> add <type> <value>
+```
+
+---
+
+## Placeholders
+
+Two placeholders are substituted into every action value:
+
+| Placeholder | Becomes |
+| :--- | :--- |
+| `<player>` | The clicking player's name |
+| `%player_name%` | The clicking player's name |
+
+<Callout type="warn">
+  `{player}` with curly braces is **not** a placeholder and will be printed literally.
+  Use `<player>` or `%player_name%`.
+</Callout>
+
+If PlaceholderAPI is installed, all of its placeholders work too.
+
+For safety, whitespace is stripped from substituted player names before they reach
+`[console]` and `[player]` actions, so a Bedrock or nicknamed player cannot append extra
+arguments to a command you wrote.
+
+---
+
+## Action tags
+
+| Tag | Description | Example |
+| :--- | :--- | :--- |
+| `[message]` | Private chat message to the clicking player. | `[message] <yellow>Welcome, <player>!` |
+| `[broadcast]` | Message to the whole server. | `[broadcast] <gold><player> started the quest!` |
+| `[chat]` | Makes the player say something in public chat. | `[chat] I accept the quest.` |
+| `[console]` | Runs a command as the console. | `[console] eco give <player> 100` |
+| `[player]` | Makes the player run a command themselves. | `[player] warp spawn` |
+| `[title]` | Large on-screen title. | `[title] <aqua><bold>THE DUNGEON` |
+| `[subtitle]` | Smaller line under the title. | `[subtitle] <gray>Prepare yourself` |
+| `[give_exp]` | Grants experience points. | `[give_exp] 500` |
+| `[take_exp]` | Removes experience points. | `[take_exp] 100` |
+| `[server]` | Sends the player to another BungeeCord/Velocity server. | `[server] survival-2` |
+
+`[title]` and `[subtitle]` are buffered and sent together, so putting both in a list
+produces one combined title rather than two flashes.
+
+<Callout type="info">
+  `connect` is accepted as an alias when adding an action, but the tag stored and executed
+  is `[server]`.
+</Callout>
+
+---
+
+## Conditions
+
+Conditions do not produce output. If one fails, **the rest of the list is skipped**.
+
+| Tag | Passes when | Example |
+| :--- | :--- | :--- |
+| `[require_permission]` | Player holds the node. | `[require_permission] ranks.vip` |
+| `[require_money]` | Player's Vault balance is at least the amount. | `[require_money] 1500` |
+| `[cooldown]` | The player's timer for this NPC has expired. | `[cooldown] 30s` |
+
+### Cooldown formats
+
+`5s`, `10m`, `24h`, `7d`. A bare number is read as seconds. Cooldowns are per player *and*
+per NPC, and survive restarts via `cooldowns.yml`.
+
+### require_money needs PlaceholderAPI
+
+`[require_money]` reads `%vault_eco_balance%`, so it needs both PlaceholderAPI and the
+Vault expansion. If no economy provider is available, the condition **blocks** the action
+and logs why. To make it pass through instead, set:
+
+```yaml
+actions:
+  require-money-strict: false
+```
+
+Because conditions stop the chain, order matters — always put them **before** the reward.
+
+### Put cooldown last among the conditions
+
+`[cooldown]` does not only check the timer, it **starts** it as soon as it passes. So if it
+sits above a check that then fails, the player has spent their attempt and received nothing:
+
+```bash
+# Wrong — a player who cannot pay still loses their hourly try
+[cooldown] 1h
+[require_money] 500
+
+# Right — the timer only starts once entry is actually going ahead
+[require_money] 500
+[cooldown] 1h
+```
+
+The general rule: cheap, side-effect-free checks first; anything that consumes something
+last.
+
+---
+
+## Building a chain
+
+A VIP dungeon guardian that rate-limits, checks rank, charges money, then teleports:
+
+```bash
+# Conditions first — any failure stops everything below.
+# Cooldown goes last of the three, because passing it consumes it.
+/coconpc action 5 add require_permission ranks.vip
+/coconpc action 5 add require_money 1500
+/coconpc action 5 add cooldown 30s
+
+# Then the payload
+/coconpc action 5 add title <gold><bold>ENTERING SANCTUM
+/coconpc action 5 add subtitle <gray>Good luck, <player>
+/coconpc action 5 add console eco take <player> 1500
+/coconpc action 5 add console mv tp <player> vip_dungeon
+```
+
+<Callout type="warn">
+  `[require_money]` only *checks* a balance, it never deducts one. Charging the player is a
+  separate `[console]` action, as above.
+</Callout>
+
+---
+
+## Managing a chain
+
+```bash
+/coconpc action 5 list        # numbered listing
+/coconpc action 5 remove 2    # delete entry #2 (1-based)
+/coconpc action 5 clear       # wipe every action
+```
+
+Indexes shift after a removal, so re-run `list` before removing again.
+
+---
+
+## Where actions live
+
+Actions are stored in `npcs/<id>.yml`, alongside everything else about that NPC:
+
+```yaml
+# npcs/5.yml
+uuid: 3f2b8c1a-...
+id: 5
+size: 1.0
+location: { world: world, x: 12.5, y: 64.0, z: -8.5, yaw: 180.0, pitch: 0.0 }
+actions:
+  - '[require_permission] ranks.vip'
+  - '[cooldown] 30s'
+  - '[message] <yellow>Welcome, <player>!'
+```
+
+You can edit that file directly and run `/coconpc reload`.

@@ -1,0 +1,78 @@
+name: CocoNPC
+version: ${version}
+main: com.pumpkings.coconpc.CocoNPC
+description: Advanced NPC management plugin for modern Paper servers.
+api-version: '1.21'
+author: Pumpkings
+dependencies:
+  server:
+    packetevents:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    PlaceholderAPI:
+      load: BEFORE
+      required: false
+      join-classpath: true
+
+permissions:
+  CocoNPC.admin:
+    description: Grants every CocoNPC command.
+    default: op
+    children:
+      CocoNPC.spawn: true
+      CocoNPC.list: true
+      CocoNPC.tp: true
+      CocoNPC.tphere: true
+      CocoNPC.npc.delete: true
+      CocoNPC.npc.edit: true
+      CocoNPC.action: true
+      CocoNPC.pose: true
+      CocoNPC.resize: true
+      CocoNPC.item: true
+      CocoNPC.skin: true
+      CocoNPC.clone: true
+      CocoNPC.viewdistance: true
+      CocoNPC.reload: true
+  CocoNPC.spawn:
+    description: Spawn new NPCs.
+    default: op
+  CocoNPC.list:
+    description: List spawned NPCs.
+    default: op
+  CocoNPC.tp:
+    description: Teleport to an NPC.
+    default: op
+  CocoNPC.tphere:
+    description: Teleport an NPC to you.
+    default: op
+  CocoNPC.npc.delete:
+    description: Delete an NPC.
+    default: op
+  CocoNPC.npc.edit:
+    description: Open the NPC editor, by command or by shift-clicking an NPC.
+    default: op
+  CocoNPC.action:
+    description: Manage NPC click actions.
+    default: op
+  CocoNPC.pose:
+    description: Apply preset poses.
+    default: op
+  CocoNPC.resize:
+    description: Resize an NPC.
+    default: op
+  CocoNPC.item:
+    description: Equip or clear NPC hand items.
+    default: op
+  CocoNPC.skin:
+    description: Change an NPC's skin.
+    default: op
+  CocoNPC.clone:
+    description: Clone an NPC.
+    default: op
+  CocoNPC.viewdistance:
+    description: Read and change the NPC view distance.
+    default: op
+  CocoNPC.reload:
+    description: Reload configuration and preload local skins.
+    default: op

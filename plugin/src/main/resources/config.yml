@@ -1,0 +1,50 @@
+# ============================================================
+#  CocoNPC - Main configuration
+# ============================================================
+
+mineskin:
+  # REQUIRED. Get a free key at https://mineskin.org/account
+  #
+  # CocoNPC renders a skin across eleven separate player heads, which means slicing it
+  # into eleven textures and hosting each one. MineSkin does that hosting, and its API
+  # will not generate skins without a key. Without one, skins already cached in
+  # skins.yml keep working, but no NEW skin can be spawned.
+  #
+  # Set it here and run /coconpc reload, or in-game with /coconpc setkey <key>.
+  #
+  # NEVER share this file publicly once you fill in your own key.
+  user-agent: "CocoNPC"
+  api-key: ""
+
+npc:
+  # Distance (in blocks) at which NPCs become visible to players.
+  # Minimum 8. Changed live with /coconpc viewdistance <blocks>.
+  view-distance: 48
+
+bedrock:
+  # Bedrock clients (via Geyser/Floodgate) do not render Display entities, so CocoNPC
+  # NPCs are invisible to them. By default their clicks are ignored, because otherwise
+  # they would be triggering rewards by hitting something they cannot see.
+  # Set to false to let Bedrock players trigger NPC actions anyway.
+  block-interactions: true
+
+  # Send the player a message when their interaction is blocked, instead of nothing
+  # happening at all. The text lives in messages.yml under BEDROCK_UNSUPPORTED.
+  notify-blocked: true
+
+actions:
+  # When true, the [require_money] condition FAILS (blocks the action) if
+  # PlaceholderAPI / Vault is unavailable, instead of silently letting it pass.
+  # Keep this true unless you know what you are doing.
+  require-money-strict: true
+
+  # Placeholders are expanded before [console] commands run. Any character in
+  # this list is stripped from the expanded text so a crafted player name or
+  # nickname cannot chain extra commands.
+  # Control characters (newlines, tabs and friends) are always stripped regardless
+  # of this list, so they do not need to be listed here.
+  # Set to an empty list to disable sanitising (not recommended).
+  console-blocked-characters: [";", "|", "&"]
+
+  # Duration (in seconds) that [title] and [subtitle] actions stay on screen.
+  title-duration-seconds: 3

@@ -1,0 +1,95 @@
+---
+title: /coconpc edit
+description: Open the editor GUI to pose limbs, toggle parts, and configure the hologram.
+---
+
+Selects an NPC and opens its editor GUI.
+
+---
+
+## Syntax
+
+```bash
+/coconpc edit <id>
+```
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<id>` | Integer | Yes | Target NPC id. |
+
+You can also **shift + right-click** an NPC in the world to open the same GUI. Both paths
+require `CocoNPC.npc.edit`.
+
+---
+
+## The NPC editor
+
+One button per body part: head, body, right and left arm, right and left leg, right and
+left held item, the hologram, and **Global** for the whole NPC at once.
+
+| Click | Effect |
+| :--- | :--- |
+| **Left click** | Enter 3D editing mode for that part |
+| **Right click** | Toggle that part's visibility |
+| **Shift + left click** | Type exact rotation values in chat as `pitch yaw roll` |
+| **Shift + right click** on the hologram | Open the hologram editor |
+
+Typed rotations look like:
+
+```text
+45 0 -20
+```
+
+3D editing mode is where the real work happens — six scroll-driven modes covering rotation,
+joint bending and positioning. That has [its own page](/docs/editor).
+
+---
+
+## The hologram editor
+
+### Lines
+
+Add a line, remove an individual line, or clear them all. Lines accept full
+[MiniMessage](https://docs.advntr.dev/minimessage/format.html) formatting:
+
+```text
+<gradient:#ff9a00:#ff2e63><bold>QUEST MASTER</bold></gradient>
+```
+
+Adding a line prompts you in chat. Type `cancel` to back out.
+
+### Billboard
+
+How the text turns to face the viewer:
+
+| Value | Behaviour |
+| :--- | :--- |
+| `CENTER` | Always faces the player on both axes. The default. |
+| `VERTICAL` | Turns horizontally to track the player, keeps its vertical tilt. |
+| `HORIZONTAL` | Tilts vertically, keeps its compass orientation. |
+| `FIXED` | Locked to world orientation, does not track at all. |
+
+### Shadow and background
+
+Toggle the text's drop shadow, and set the background to `transparent`, `default`, or a hex
+value. Both `#RRGGBB` and `#AARRGGBB` are accepted, so `#80000000` gives a half-transparent
+black panel.
+
+### Moving it
+
+While in hologram edit mode, scroll to raise and lower the hologram.
+
+---
+
+## Saving
+
+Changes are written to disk when you leave 3D editing mode with **shift + left-click**, and
+immediately for GUI actions like toggling visibility or editing the hologram.
+
+---
+
+## Customising the GUI itself
+
+The layouts live in `menus/npc_editor.yml` and `menus/hologram_editor.yml` — button items,
+slots, titles, lore and filler slots are all configurable. Run `/coconpc reload` and reopen
+the GUI to see changes.

@@ -1,0 +1,60 @@
+---
+title: /coconpc pose
+description: Apply one of the built-in preset poses to an NPC.
+---
+
+Applies a preset arrangement of limb rotations and offsets in one step.
+
+---
+
+## Syntax
+
+```bash
+/coconpc pose <id> <pose>
+```
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<id>` | Integer | Yes | Target NPC id. |
+| `<pose>` | String | Yes | One of the presets below. Tab-completed. |
+
+---
+
+## Available poses
+
+| Pose | Result |
+| :--- | :--- |
+| `stand` | Resets every rotation and offset back to the default upright stance. |
+| `sit` | Thighs horizontal, shins hanging down, arms resting over the lap, body dropped so it lands on a chair or stair. |
+| `lay` | Whole body rotated onto its back and lowered to ground level. |
+| `wave` | One arm raised in a greeting. |
+| `salute` | Hand brought up to the head. |
+| `crossed_arms` | Both forearms folded across the chest. |
+
+<Callout type="warn">
+  These are the only valid names. Values like `STANDING`, `SITTING` or `SLEEPING` will be
+  rejected.
+</Callout>
+
+---
+
+## Examples
+
+```bash
+/coconpc pose 1 sit
+/coconpc pose 2 crossed_arms
+/coconpc pose 3 stand      # also works as a reset
+```
+
+---
+
+## Poses are a starting point
+
+A pose is just a batch of the same rotations and offsets the
+[3D editor](/docs/editor) applies. Once a pose is on, you can keep refining it by hand, and
+your adjustments are saved on top.
+
+`stand` is the fastest way to undo a session of manual posing that went wrong — it clears
+every rotation and offset on every part.
+
+Poses are written to disk immediately, so they survive restarts.

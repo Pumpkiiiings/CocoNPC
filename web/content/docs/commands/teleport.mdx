@@ -1,0 +1,64 @@
+---
+title: /coconpc tp & tphere
+description: Teleport yourself to an NPC, or move an NPC to you.
+---
+
+Two directions of the same idea.
+
+---
+
+## Go to an NPC
+
+```bash
+/coconpc tp <id>
+```
+
+*Alias: `/coconpc teleport <id>`* — permission `CocoNPC.tp`
+
+Moves **you** to the NPC's exact position, across worlds if needed.
+
+```bash
+/coconpc tp 12
+```
+
+Pair it with [`/coconpc list`](/docs/commands/list) to find the id first.
+
+---
+
+## Bring an NPC to you
+
+```bash
+/coconpc tphere <id>
+```
+
+Permission `CocoNPC.tphere`
+
+Moves the **NPC** to where you are standing, turned to face you — the same orientation
+logic `/coconpc create` uses, so a relocated NPC looks the way a freshly spawned one would.
+
+```bash
+/coconpc tphere 12
+```
+
+---
+
+## What moves with it
+
+Everything: all eleven body parts, the interaction hitbox, and the hologram. Pose,
+rotations and custom offsets are preserved — the NPC arrives exactly as it was, just
+somewhere else.
+
+The new position is saved immediately, so it survives a restart.
+
+<Callout type="info">
+  Teleporting recalculates who can see the NPC right away, so it appears for players at the
+  destination and disappears for players at the origin without waiting for them to move.
+</Callout>
+
+---
+
+## Fine positioning
+
+`tphere` gets an NPC to roughly the right place. For placing one precisely — on a chair,
+against a wall, on a ledge — use the **Global** button in the
+[3D editor](/docs/editor), where modes 5 and 6 move the whole NPC in fractions of a block.
