@@ -1,0 +1,17 @@
+{
+  "title": "CocoNPC Documentation",
+  "pages": [
+    "index",
+    "getting-started",
+    "---Guides---",
+    "example",
+    "editor",
+    "animations",
+    "actions",
+    "---Reference---",
+    "commands",
+    "configuration",
+    "permissions",
+    "troubleshooting"
+  ]
+}

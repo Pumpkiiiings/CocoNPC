@@ -1,0 +1,76 @@
+title: "        <dark_gray>Hologram Editor"
+rows: 6
+items:
+  add_line:
+    material: EMERALD
+    slot: 47
+    name: "<b><color:#42F56C>+ Add Hologram Line</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Type a new line in chat.</color>"
+  remove_line:
+    material: REDSTONE
+    slot: 48
+    name: "<b><color:#FF3344>- Remove Last Line</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#FF3344>Left Click:</color> <color:#CCCCCC>Delete the bottom line.</color>"
+  clear_all:
+    material: BARRIER
+    slot: 49
+    name: "<b><color:#FF3344>Clear All Lines</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#FF3344>Left Click:</color> <color:#CCCCCC>Delete all lines.</color>"
+  billboard:
+    material: COMPASS
+    slot: 50
+    name: "<b><color:#FFE300>Billboard Orientation</color></b>"
+    lore:
+      - ""
+      - "<color:#33CCFF>Current Mode:</color> <color:#FFFFFF>%billboard%</color>"
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Toggle (CENTER, VERTICAL, HORIZONTAL, FIXED).</color>"
+  shadow:
+    material: ENDER_EYE
+    slot: 51
+    name: "<b><color:#FFAA00>Text Shadow</color></b>"
+    lore:
+      - ""
+      - "<color:#33CCFF>Status:</color> <color:#FFFFFF>%shadow%</color>"
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Toggle text shadow ON / OFF.</color>"
+  background:
+    material: LEATHER
+    slot: 52
+    name: "<b><color:#33CCFF>Background Color</color></b>"
+    lore:
+      - ""
+      - "<color:#33CCFF>Current:</color> <color:#FFFFFF>%background%</color>"
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Toggle Transparent / Dark Default.</color>"
+      - "<color:#888888>▪</color> <color:#FFAA00>Shift + Left Click:</color> <color:#CCCCCC>Type custom hex in chat (#80000000, transparent, etc).</color>"
+  back:
+    material: ARROW
+    slot: 45
+    name: "<b><color:#FFE300>« Back to NPC Editor</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#FFE300>Click:</color> <color:#CCCCCC>Return to main editor menu.</color>"
+  line_template:
+    material: PAPER
+    name: "<b><color:#33CCFF>Line #{index}</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>Text:</color> {line}"
+      - ""
+      - "<color:#888888>▪</color> <color:#FF3344>Right Click:</color> <color:#CCCCCC>Delete this specific line.</color>"
+
+fillers:
+  default:
+    material: BLACK_STAINED_GLASS_PANE
+    name: ""
+  border_top_bottom:
+    material: BLUE_STAINED_GLASS_PANE
+    name: ""
+    slots: [0, 1, 2, 3, 4, 5, 6, 7, 8, 46, 53]

@@ -1,0 +1,92 @@
+---
+title: /coconpc action
+description: Add, list, remove and clear the click actions bound to an NPC.
+---
+
+Manages an NPC's click action list. For what the tags mean and how chains behave, see the
+[Action Engine guide](/docs/actions).
+
+---
+
+## Syntax
+
+```bash
+/coconpc action <id> <add|list|remove|clear> [arguments...]
+```
+
+| Subcommand | Syntax | Description |
+| :--- | :--- | :--- |
+| `add` | `action <id> add <type> <value>` | Append an action to the end of the list. |
+| `list` | `action <id> list` | Show the numbered list. |
+| `remove` | `action <id> remove <index>` | Delete one entry by its 1-based number. Aliases `del`, `delete`. |
+| `clear` | `action <id> clear` | Delete every action. |
+
+---
+
+## Valid types
+
+Write the type with or without brackets — `message` and `[message]` both work.
+
+**Actions:** `message`, `broadcast`, `chat`, `console`, `player`, `title`, `subtitle`,
+`give_exp`, `take_exp`, `server`
+
+**Conditions:** `require_permission`, `require_money`, `cooldown`
+
+<Callout type="info">
+  `connect` is accepted as an alias for `server`, but the stored tag is `[server]`.
+</Callout>
+
+---
+
+## Examples
+
+```bash
+# A greeting that uses the clicking player's name
+/coconpc action 1 add message <yellow>Welcome to the city, <player>!
+
+# Pay the player from console
+/coconpc action 1 add console eco give <player> 100
+
+# Rate-limit the NPC to one use per minute
+/coconpc action 1 add cooldown 1m
+
+# Send them to another backend server
+/coconpc action 1 add server survival-2
+```
+
+<Callout type="warn">
+  Use `<player>` or `%player_name%`. `{player}` is not a placeholder and prints literally.
+</Callout>
+
+---
+
+## Reviewing and editing
+
+```bash
+/coconpc action 1 list
+```
+
+```text
+--- Actions for NPC #1 ---
+#1: [cooldown] 1m
+#2: [message] <yellow>Welcome to the city, <player>!
+#3: [console] eco give <player> 100
+```
+
+Remove entry 2, then wipe the list entirely:
+
+```bash
+/coconpc action 1 remove 2
+/coconpc action 1 clear
+```
+
+Removing an entry renumbers everything after it, so run `list` again before your next
+`remove`.
+
+---
+
+## Order matters
+
+Actions run top to bottom, and a failed **condition** stops the rest of the list. Put
+`cooldown`, `require_permission` and `require_money` above the rewards they guard, or the
+reward will already have been handed out by the time the check runs.

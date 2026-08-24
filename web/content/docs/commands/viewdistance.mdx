@@ -1,0 +1,52 @@
+---
+title: /coconpc viewdistance
+description: Read or change how far away NPCs become visible.
+---
+
+NPCs are sent to players only within a radius. This command reads and changes that radius.
+
+---
+
+## Syntax
+
+```bash
+/coconpc viewdistance [blocks]
+```
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `[blocks]` | Integer | No | New radius in blocks. Minimum 8. Omit to read the current value. |
+
+---
+
+## Examples
+
+```bash
+/coconpc viewdistance        # report the current radius
+/coconpc viewdistance 64     # widen it to 64 blocks
+```
+
+Default is **48 blocks**. Tab completion offers `16`, `32`, `48`, `64` and `80`.
+
+---
+
+## Notes
+
+The change takes effect immediately for everyone online — no reconnect needed — and is
+written to `config.yml`, so it survives a restart:
+
+```yaml
+npc:
+  view-distance: 64
+```
+
+Values below 8 are clamped up to 8.
+
+### Choosing a value
+
+Visibility is recomputed as players move, so the radius trades render distance against
+work done per player. A larger radius means more NPCs in range at once and more spawn and
+despawn packets as people walk around. On a server with many NPCs in one area, lowering
+this is the first thing to try.
+
+It does not affect *whether* an NPC exists, only who is currently being shown it.

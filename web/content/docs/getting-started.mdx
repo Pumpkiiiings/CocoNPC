@@ -1,0 +1,123 @@
+---
+title: Getting Started
+description: Install CocoNPC, configure the MineSkin key, and spawn your first NPC.
+---
+
+## 1. Install the dependencies
+
+CocoNPC will not load without **PacketEvents**. It is a hard dependency, not a soft one:
+every part of an NPC is drawn with packets.
+
+1. Download **PacketEvents 2.13.0** or newer and drop it into `plugins/`.
+2. Drop `CocoNPC-1.0.0.jar` into `plugins/`.
+3. Start the server on **Paper 1.21 or newer**, up to and including **26.2**.
+
+The same jar works across the whole range — there is no separate build per version.
+
+<Callout type="info">
+  Minecraft moved to date-based versioning after 1.21.11, so `26.1` and `26.2` are newer
+  than `1.21.x`, not older. Java requirements follow the server: 1.21.x runs on Java 21,
+  26.x needs Java 25. The plugin itself is built for Java 21, so it loads on both.
+</Callout>
+
+On first start the plugin creates `plugins/CocoNPC/` containing `config.yml`,
+`messages.yml`, `menus/`, and an empty `skins/` folder.
+
+---
+
+## 2. Set your MineSkin API key
+
+To render a skin across eleven separate heads, CocoNPC slices the skin into per-limb
+textures and uploads each one to [MineSkin](https://mineskin.org). The MineSkin v3 API
+**will not do this anonymously**, so a key is required.
+
+Without a key you will see this on startup:
+
+```text
+[CocoNPC] No MineSkin API key set. Skin generation will fail — get a key at
+https://mineskin.org/account and apply it with /coconpc setkey <key>.
+```
+
+Get a free key at [mineskin.org/account](https://mineskin.org/account), then apply it
+either way:
+
+```bash
+# In-game, applies immediately
+/coconpc setkey your_api_key_here
+```
+
+```yaml
+# Or in plugins/CocoNPC/config.yml, then run /coconpc reload
+mineskin:
+  api-key: "your_api_key_here"
+```
+
+<Callout type="warn">
+  `/coconpc setkey` is echoed into your server log like any other command. On a server
+  where other people can read the console, edit `config.yml` instead and reload.
+</Callout>
+
+Already-cached skins in `skins.yml` keep working without a key. Only *new* skins need one.
+
+---
+
+## 3. Spawn your first NPC
+
+```bash
+/coconpc create 1 Notch
+```
+
+The id comes **first** and is required. The skin argument accepts a premium player name, a
+direct texture URL, or the filename of a `.png` you dropped into `plugins/CocoNPC/skins/`.
+
+The first spawn of any given skin is slow — eleven textures have to be cropped and
+uploaded. Progress is reported in chat. Once cached in `skins.yml`, the same skin spawns
+instantly forever after.
+
+Add a size multiplier as a third argument:
+
+```bash
+/coconpc create 2 Notch 2.5   # two-and-a-half times scale
+```
+
+---
+
+## 4. Customise it
+
+| Goal | How |
+| :--- | :--- |
+| Open the editor GUI | `/coconpc edit 1`, or shift + right-click the NPC |
+| Pose limbs by hand | [3D editor](/docs/editor) — left-click a part in the GUI |
+| Apply a preset pose | `/coconpc pose 1 sit` |
+| Give it an item | Hold the item, then `/coconpc item 1 right` |
+| Make it do something | [Action engine](/docs/actions) |
+| Change the hologram | Shift-click the hologram button in the editor GUI |
+
+---
+
+## Local skin files
+
+Drop any `.png` skin into `plugins/CocoNPC/skins/` and it becomes available by filename,
+with tab completion:
+
+```bash
+/coconpc create 3 my_custom_skin
+```
+
+To upload every new local skin to the texture cache ahead of time — so the first player
+interaction is not the one that waits — run:
+
+```bash
+/coconpc preload
+```
+
+Slim ("Alex") three-pixel-arm skins are detected and converted to the classic four-pixel
+layout automatically.
+
+---
+
+## Need help?
+
+Join the [CocoNPC Discord](https://discord.gg/ydsUw5UJrB) for support, bug reports and
+release announcements. Check [Troubleshooting](/docs/troubleshooting) first — it covers the
+common install problems.

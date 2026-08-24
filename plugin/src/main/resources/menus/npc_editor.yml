@@ -1,0 +1,96 @@
+title: "              <dark_gray>NPC Editor"
+rows: 4
+items:
+  head:
+    material: PLAYER_HEAD
+    slot: 4
+    name: "<b><color:#FFE300>Head</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Rotate part.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle visibility.</color>"
+  hologram:
+    material: NAME_TAG
+    slot: 8
+    name: "<b><color:#FFE300>Hologram</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Rotate part.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle visibility.</color>"
+      - "<color:#888888>▪</color> <color:#FFAA00>Shift + Click:</color> <color:#CCCCCC>Open hologram editor.</color>"
+  right_arm:
+    material: STICK
+    slot: 12
+    name: "<b><color:#FFE300>Right Arm</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Rotate part.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle visibility.</color>"
+  body:
+    material: LEATHER_CHESTPLATE
+    slot: 13
+    name: "<b><color:#FFE300>Body</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Rotate part.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle visibility.</color>"
+  left_arm:
+    material: STICK
+    slot: 14
+    name: "<b><color:#FFE300>Left Arm</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Rotate part.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle visibility.</color>"
+  right_item:
+    material: DIAMOND_SWORD
+    slot: 20
+    name: "<b><color:#FFE300>Right Item</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Rotate part.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle visibility.</color>"
+  right_leg:
+    material: LEATHER_BOOTS
+    slot: 21
+    name: "<b><color:#FFE300>Right Leg</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Rotate part.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle visibility.</color>"
+  global:
+    material: COMPASS
+    slot: 22
+    name: "<b><color:#42F56C>Global (Whole NPC)</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Move or rotate entire NPC.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle full visibility.</color>"
+  left_leg:
+    material: LEATHER_BOOTS
+    slot: 23
+    name: "<b><color:#FFE300>Left Leg</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Rotate part.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle visibility.</color>"
+  left_item:
+    material: DIAMOND_SWORD
+    slot: 24
+    name: "<b><color:#FFE300>Left Item</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#42F56C>Left Click:</color> <color:#CCCCCC>Rotate part.</color>"
+      - "<color:#888888>▪</color> <color:#33CCFF>Right Click:</color> <color:#CCCCCC>Toggle visibility.</color>"
+  delete:
+    material: BARRIER
+    slot: 31
+    name: "<b><color:#FF3344>Delete NPC</color></b>"
+    lore:
+      - ""
+      - "<color:#888888>▪</color> <color:#FF3344>Left Click:</color> <color:#CCCCCC>Permanently delete this NPC.</color>"
+
+fillers:
+  default:
+    material: GRAY_STAINED_GLASS_PANE
+    name: ""

@@ -1,0 +1,57 @@
+---
+title: /coconpc delete
+description: Permanently remove an NPC and wipe its stored data.
+---
+
+Destroys an NPC and erases everything associated with it.
+
+---
+
+## Syntax
+
+```bash
+/coconpc delete <id>
+```
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<id>` | Integer | Yes | Target NPC id. |
+
+---
+
+## Example
+
+```bash
+/coconpc delete 7
+```
+
+---
+
+## What gets removed
+
+1. **The NPC stops being drawn.** Destroy packets go out to every player currently seeing
+   it, so it disappears immediately for everyone.
+2. **Registry entries.** Both the UUID and the numeric id are released, freeing that id for
+   reuse.
+3. **Stored data.** Its file, `npcs/<id>.yml`, is deleted — position, skin, pose, hand
+   items, hologram and actions all go with it.
+
+<Callout type="warn">
+  Deletion is immediate and permanent. Actions, pose, hologram, items and skin binding for
+  that id are all gone. There is no undo.
+</Callout>
+
+---
+
+## Why `/kill` does not work
+
+NPCs are packet-only — they never exist as world entities. Command selectors cannot see
+them, so `/kill @e` and similar have no effect. This command is the only way to remove one.
+
+The same property means an NPC cannot be accidentally destroyed by a stray kill command,
+a chunk wipe or a world rollback.
+
+<Callout type="info">
+  If you only want an NPC out of sight temporarily, hide its parts from the editor GUI
+  instead — right-click the **Global** button. That is reversible; delete is not.
+</Callout>

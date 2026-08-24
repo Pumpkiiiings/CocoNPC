@@ -1,0 +1,65 @@
+---
+title: /coconpc setkey
+description: Set the MineSkin API key from in-game.
+---
+
+Stores a MineSkin API key and applies it to the running plugin without a restart.
+
+---
+
+## Syntax
+
+```bash
+/coconpc setkey <key>
+```
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<key>` | String | Yes | Your MineSkin API key from [mineskin.org/account](https://mineskin.org/account). |
+
+Requires `CocoNPC.admin`. There is no narrower node for it on purpose — it writes a
+credential.
+
+---
+
+## Example
+
+```bash
+/coconpc setkey msk_1a2b3c4d5e6f...
+```
+
+The key is written to `config.yml` and the MineSkin client is rebuilt on the spot, so the
+very next `/coconpc create` can generate textures.
+
+---
+
+## Security
+
+<Callout type="warn">
+  Paper writes every command a player runs into the server log, including this one. The key
+  you type will be sitting in `logs/latest.log` as plain text.
+</Callout>
+
+The command reminds you of this when you run it. On a private or local server that is
+usually fine. On a shared server, prefer editing the file:
+
+```yaml
+# plugins/CocoNPC/config.yml
+mineskin:
+  api-key: "your_key_here"
+```
+
+then run `/coconpc reload`, which also rebuilds the client.
+
+If a key does leak, revoke and regenerate it at
+[mineskin.org/account](https://mineskin.org/account).
+
+---
+
+## Why a key is needed at all
+
+CocoNPC renders a skin across eleven separate player heads, which means slicing it into
+eleven textures and hosting each one. MineSkin does that hosting, and its v3 API does not
+allow anonymous generation.
+
+Without a key, skins already cached in `skins.yml` still render — only *new* skins fail.

@@ -1,0 +1,75 @@
+---
+title: /coconpc create
+description: Spawn a new Display Entity NPC with an id, skin and optional scale.
+---
+
+Spawns an NPC at your exact position, turned to face you.
+
+---
+
+## Syntax
+
+```bash
+/coconpc create <id> <skin> [size]
+```
+
+*Alias: `/coconpc spawn`*
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<id>` | Integer | Yes | Unique numeric id used by every other command. Rejected if already in use. |
+| `<skin>` | String | Yes | Premium player name, a texture URL, or the filename of a `.png` in `plugins/CocoNPC/skins/`. |
+| `[size]` | Float | No | Scale multiplier. Default `1.0`. |
+
+<Callout type="warn">
+  The id comes **first** and is not optional. `/coconpc create Notch` will fail.
+</Callout>
+
+---
+
+## Examples
+
+```bash
+# Premium player's skin
+/coconpc create 1 Notch
+
+# A local skins/guard.png file
+/coconpc create 2 guard
+
+# Two-and-a-half times scale
+/coconpc create 3 Notch 2.5
+
+# Direct texture URL
+/coconpc create 4 https://textures.minecraft.net/texture/abcdef...
+```
+
+Tab completion suggests online player names and every `.png` in your skins folder.
+
+---
+
+## What happens on spawn
+
+1. **Skin resolution.** A player name is looked up against Mojang; a local file is read from
+   disk. Both happen off the main thread, so the server does not stall.
+2. **Slim detection.** Three-pixel-arm ("Alex") skins are converted to the classic
+   four-pixel layout so the per-limb crops line up.
+3. **Texture generation.** The skin is sliced into eleven per-limb textures, each uploaded
+   to MineSkin. This is the slow part — the first spawn of a skin can take a while, and
+   progress is reported in chat.
+4. **Caching.** The resulting texture URLs are written to `skins.yml`. Every later spawn of
+   that skin is instant.
+5. **Rendering.** The parts, hitbox and hologram are sent as packets to nearby players.
+   Nothing is placed into the world.
+
+<Callout type="warn">
+  Step 3 requires a MineSkin API key. Without one the spawn fails with an explanatory
+  message. See [Getting Started](/docs/getting-started).
+</Callout>
+
+---
+
+## After spawning
+
+The new NPC is automatically selected, so you can go straight to
+[`/coconpc edit`](/docs/commands/edit) or apply a [pose](/docs/commands/pose). Its default
+hologram reads `CocoNPC` and can be changed from the editor GUI.

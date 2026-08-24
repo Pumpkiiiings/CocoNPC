@@ -1,0 +1,79 @@
+---
+title: Welcome to CocoNPC
+description: Lightweight, fully packet-driven Minecraft NPCs built from Display Entities.
+---
+
+CocoNPC builds NPCs out of Minecraft's native **Item Display** and **Text Display** entities
+instead of simulated living mobs. Each NPC is eleven interconnected player heads — one per
+anatomical part — which is what makes limb-level posing possible at all.
+
+Nothing is spawned into the world. Every part, hitbox and hologram exists only as packets
+sent to the players near it, so an NPC costs the server no entity ticks, no AI, and no
+pathfinding.
+
+---
+
+## What that architecture buys you
+
+1. **No entity tick cost.** NPCs are not world entities. They do not tick, path, collide or
+   get saved into region files, so a hundred NPCs cost the same per-tick as zero.
+2. **Per-limb control.** Rotation, joint bending and offsets are applied to individual body
+   parts, down to fractions of a degree. Sitting, kneeling and crossed arms are just
+   transforms, not animations.
+3. **Nothing to clean up.** Because no real entities exist, an NPC can never be killed by a
+   stray `/kill @e`, dropped by a chunk wipe, or duplicated by a rollback. State lives in
+   `npcs/<id>.yml`.
+4. **Persistent action chains.** Click triggers, console dispatches, economy and permission
+   checks are stored as YAML and survive restarts.
+
+<Callout type="info">
+  Because NPCs are packet-only, they are invisible to command selectors. `/kill @e`,
+  `/data get entity`, and third-party entity viewers will not see them. Use
+  [`/coconpc list`](/docs/commands/list) to find them.
+</Callout>
+
+<Callout type="error" title="CRITICAL: Bedrock Players">
+  **Bedrock players cannot see these NPCs.** 
+  
+  Because they cannot see them, any actions or triggers bound to an NPC are permanently cancelled for Bedrock players.
+</Callout>
+
+---
+
+## Requirements
+
+| Requirement | Version |
+| :--- | :--- |
+| Server | PaperMC **1.21 through 26.2** |
+| Java | **21+** (Minecraft 26.2 itself needs 25) |
+| PacketEvents | **2.13.0+** (required, not optional) |
+| MineSkin API key | Required to generate new skins |
+| PlaceholderAPI | Optional — only for `[require_money]` |
+
+<Callout type="info">
+  One jar covers the whole range. It is compiled against the 1.21 API and against Java 21,
+  which every supported server can run. Minecraft switched to date-based versioning after
+  1.21.11, so `26.1` and `26.2` are **newer** than `1.21.x`, not older.
+</Callout>
+
+---
+
+## Start here
+
+<Cards>
+  <Card title="Getting Started" description="Install the plugin, set your MineSkin key, and spawn your first NPC." href="/docs/getting-started" />
+  <Card title="Worked Example" description="Build one complete NPC end to end, with conditions." href="/docs/example" />
+  <Card title="The 3D Editor" description="Pose limbs, bend joints and position NPCs with scroll controls." href="/docs/editor" />
+  <Card title="Action Engine" description="Bind clicks to messages, commands, economy checks and cooldowns." href="/docs/actions" />
+  <Card title="Command Reference" description="Every subcommand, argument and permission." href="/docs/commands" />
+</Cards>
+
+---
+
+## Support
+
+Questions, bug reports and feature requests go to the Discord:
+
+<Cards>
+  <Card title="Join the CocoNPC Discord" description="Get help, report bugs and follow updates." href="https://discord.gg/ydsUw5UJrB" />
+</Cards>

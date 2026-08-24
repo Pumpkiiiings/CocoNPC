@@ -1,0 +1,59 @@
+---
+title: /coconpc reload & preload
+description: Reload configuration from disk, and pre-upload local skin files.
+---
+
+## `/coconpc reload`
+
+Re-reads every configuration file without restarting the server.
+
+```bash
+/coconpc reload
+```
+
+Reloaded:
+
+| File | Contents |
+| :--- | :--- |
+| `config.yml` | MineSkin key, view distance, action safety settings |
+| `messages.yml` | Every message the plugin sends |
+| `menus/npc_editor.yml` | NPC editor GUI layout |
+| `menus/hologram_editor.yml` | Hologram editor GUI layout |
+| `npcs/<id>.yml` | Everything about each NPC: position, skin, pose, hand items, hologram, actions |
+
+The MineSkin client is rebuilt as part of the reload, so a key pasted straight into
+`config.yml` takes effect without a restart.
+
+<Callout type="info">
+  Reloading does not respawn or flicker existing NPCs. Menu changes apply the next time a
+  GUI is opened.
+</Callout>
+
+---
+
+## `/coconpc preload`
+
+Uploads every `.png` in `plugins/CocoNPC/skins/` that is not already cached.
+
+```bash
+/coconpc preload
+```
+
+Both commands use the `CocoNPC.reload` permission.
+
+### Why bother
+
+The first spawn of any skin has to crop and upload eleven textures, which takes real time.
+Preloading moves that cost to a moment you choose instead of the moment a builder is
+waiting on a `/coconpc create`.
+
+It also runs automatically on server start, so skins you dropped in while the server was
+down are ready by the time anyone needs them.
+
+Progress is logged to console, and the work happens off the main thread — the server keeps
+running normally throughout. Skins already present in `skins.yml` are skipped, so running
+it repeatedly is cheap and safe.
+
+<Callout type="warn">
+  Preloading needs a MineSkin API key, same as spawning a new skin.
+</Callout>

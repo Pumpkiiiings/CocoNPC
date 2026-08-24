@@ -1,0 +1,41 @@
+---
+title: Blockbench Animations
+description: Play 100% vanilla animations without requiring Resource Packs.
+---
+
+CocoNPC natively supports playing **Blockbench `.bbmodel`** animations without requiring a resource pack!
+
+Since we use Vanilla Display Entities, CocoNPC takes standard **Player Limbs** and animates them mathematically using `Slerp` quaternions interpolation. 
+
+---
+
+## 🚀 How it works
+
+CocoNPC links your animation keyframes to the NPC's 6 body parts: `head`, `body`, `right_arm`, `left_arm`, `right_leg`, and `left_leg`. 
+
+This means that your `.bbmodel` MUST be a model composed of these 6 standard player limbs. Custom geometry (like a 20-bone dragon or a car) will **not** work because CocoNPC enforces mapping your standard `.png` skin to exactly 6 player limbs.
+
+---
+
+## 🛠️ Supported Models
+
+* Any `.bbmodel` designed for standard player-limb bones (e.g., exported Bedrock player models).
+* The bone names in your Blockbench outliner **MUST** be named exactly:
+  * `head`
+  * `body`
+  * `right_arm`
+  * `left_arm`
+  * `right_leg`
+  * `left_leg`
+* Exported Bedrock Animation `.json` files are also supported if you prefer not to drop the entire `.bbmodel`.
+
+---
+
+## 🎮 How to use
+
+1. **Create or download** a player animation in Blockbench (ensure the bone names match the ones above).
+2. **Drop** your `.bbmodel` (or `.json`) file directly into `plugins/CocoNPC/animations/`.
+3. **Restart** the server or run `/coconpc reload`. The plugin will automatically parse and load all the animations inside your model.
+4. **Play** the animation in-game using the API or state configs!
+
+> **Note:** The names of the animations will be exactly as you named them inside Blockbench (e.g. `idle`, `walk`, `wave`).
