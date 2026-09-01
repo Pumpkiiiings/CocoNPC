@@ -5,6 +5,7 @@ import com.pumpkings.coconpc.command.SubCommand;
 import com.pumpkings.coconpc.core.config.Message;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import com.pumpkings.coconpc.util.NpcInputPolicy;
 
 public class SpawnCommand extends SubCommand {
 
@@ -19,7 +20,7 @@ public class SpawnCommand extends SubCommand {
             return;
         }
         String customId = args[1];
-        if (!customId.matches("^[a-zA-Z0-9]+$")) {
+        if (!NpcInputPolicy.isValidNpcId(customId)) {
             Message.INVALID_NUMBER.send(plugin, player, "{value}", args[1]);
             return;
         }

@@ -17,18 +17,15 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.pumpkings.coconpc.util.NpcInputPolicy;
+import com.pumpkings.coconpc.util.SecureSkinLoader;
 
 public class NpcRegistry {
     private final CocoNPC plugin;
     private final Map<UUID, NpcEntity> npcs = new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<UUID, String> npcs_id = new java.util.concurrent.ConcurrentHashMap<>();
-    private final Pattern pattern = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
 
     public NpcRegistry(CocoNPC plugin) {
         this.plugin = plugin;
@@ -79,8 +76,7 @@ public class NpcRegistry {
             if (localFile.exists()) {
                 text = localFile.getName();
             } else {
-                Matcher matcher = pattern.matcher(text);
-                if (text.length() <= 16 && matcher.matches()) {
+                if (NpcInputPolicy.isValidPlayerName(text)) {
                     String link = plugin.getMojangApi().fetchMojangSkinUrl(text);
                     if (link == null) {
                         runOnMain(() -> Message.SKIN_NOT_FOUND.send(plugin, player));
@@ -287,18 +283,9 @@ public class NpcRegistry {
 
     private BufferedImage getSkin(String link) {
         try {
-            java.io.File skinFolder = new java.io.File(plugin.getDataFolder(), "skins");
-            java.io.File localFile = new java.io.File(skinFolder, link);
-            if (!localFile.exists() && !link.endsWith(".png")) {
-                localFile = new java.io.File(skinFolder, link + ".png");
-            }
-            if (localFile.exists()) {
-                return javax.imageio.ImageIO.read(localFile);
-            }
-
-            java.net.URL url = new java.net.URL(link);
-            return javax.imageio.ImageIO.read(url);
+            return SecureSkinLoader.load(new java.io.File(plugin.getDataFolder(), "skins").toPath(), link);
         } catch (Exception e) {
+            plugin.getLogger().warning("Rejected skin source: " + e.getMessage());
             return null;
         }
     }

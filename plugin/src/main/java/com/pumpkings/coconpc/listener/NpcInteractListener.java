@@ -43,16 +43,19 @@ public class NpcInteractListener implements Listener {
             if (npc != null && target != null) {
                 com.pumpkings.coconpc.core.npc.selection.GizmoMode gizmoMode = plugin.getGizmoManager().getMode(player);
                 if (gizmoMode == com.pumpkings.coconpc.core.npc.selection.GizmoMode.TRANSLATION) {
-                    float dX = 0, dY = 0, dZ = 0;
-                    float translationSpeed = (player.isSneaking() ? 0.01f : 0.05f) * delta;
-                    switch (grabbed) {
-                        case X -> dX = translationSpeed;
-                        case Y -> dY = translationSpeed;
-                        case Z -> dZ = translationSpeed;
+                    float translationSpeed = plugin.getConfigManager()
+                            .getEditorTranslationStep(player.isSneaking()) * delta;
+                    org.joml.Vector3f direction = plugin.getGizmoManager()
+                            .getAxisDirection(npc, target, grabbed)
+                            .mul(translationSpeed);
+                    if (target == com.pumpkings.coconpc.menu.EditorTarget.GLOBAL) {
+                        npc.translate(direction.x, direction.y, direction.z);
+                    } else {
+                        npc.addOffset(target, direction.x, direction.y, direction.z);
                     }
-                    npc.addOffset(target, dX, dY, dZ);
                 } else {
-                    float rotationSpeed = (player.isSneaking() ? 1.0f : 5.0f) * delta;
+                    float rotationSpeed = plugin.getConfigManager()
+                            .getEditorRotationStep(player.isSneaking()) * delta;
                     float dPitch = 0, dYaw = 0, dRoll = 0;
                     switch (grabbed) {
                         case X -> dPitch = rotationSpeed;
@@ -67,6 +70,7 @@ public class NpcInteractListener implements Listener {
                         npc.addRotation(target, dPitch, dYaw, dRoll);
                     }
                 }
+                plugin.getGizmoManager().refresh(player);
             }
         }
     }
@@ -97,11 +101,19 @@ public class NpcInteractListener implements Listener {
                         if (npc != null && target != null) {
                             com.pumpkings.coconpc.core.npc.selection.EditorAxis looked = plugin.getGizmoManager().getLookedAxis(player, npc, target);
                             if (looked != com.pumpkings.coconpc.core.npc.selection.EditorAxis.NONE) {
-                                com.pumpkings.coconpc.core.npc.selection.GrabMode mode = event.getAction().isRightClick() 
-                                    ? com.pumpkings.coconpc.core.npc.selection.GrabMode.JOINT 
-                                    : com.pumpkings.coconpc.core.npc.selection.GrabMode.PRIMARY;
+                                boolean jointEdit = plugin.getGizmoManager().getMode(player)
+                                        == com.pumpkings.coconpc.core.npc.selection.GizmoMode.ROTATION
+                                        && event.getAction().isRightClick()
+                                        && target != com.pumpkings.coconpc.menu.EditorTarget.GLOBAL;
+                                com.pumpkings.coconpc.core.npc.selection.GrabMode mode = jointEdit
+                                        ? com.pumpkings.coconpc.core.npc.selection.GrabMode.JOINT
+                                        : com.pumpkings.coconpc.core.npc.selection.GrabMode.PRIMARY;
                                 plugin.getGizmoManager().grabAxis(player, looked, mode);
-                                String modeName = mode == com.pumpkings.coconpc.core.npc.selection.GrabMode.JOINT ? "Articulación" : "Rotación";
+                                String modeName = plugin.getGizmoManager().getMode(player)
+                                        == com.pumpkings.coconpc.core.npc.selection.GizmoMode.TRANSLATION
+                                        ? "Movimiento"
+                                        : mode == com.pumpkings.coconpc.core.npc.selection.GrabMode.JOINT
+                                            ? "Articulación" : "Rotación";
                                 player.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize("<green>Eje " + looked.name() + " agarrado en modo " + modeName + ". Usa la rueda del ratón (scroll) para editar, haz clic para soltar."));
                             }
                         }

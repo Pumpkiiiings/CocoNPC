@@ -33,18 +33,20 @@ Creating the perfect scene has never been easier. Use our in-game visual editor 
 
 1. **Shift + Right-Click** an NPC to open the GUI Editor (`NpcEditorMenu`).
 2. **Left-Click** any body part to enter **3D Editing Mode**.
-3. **Switch Modes** by **Right-Clicking the air** or pressing **'F' (Swap Hand)**.
+3. **Aim at a colored gizmo axis** and click it. Left-click edits the main part;
+   right-click edits the elbow/knee joint. Press **F** to switch rotation/translation.
 
-| Editing Mode | `Scroll` (Normal) | `Shift + Scroll` (Precision) |
-| :--- | :--- | :--- |
-| 🔄 **1. Rotation** | **Yaw:** Turn horizontally | **Pitch:** Tilt forward / backward |
-| 🔃 **2. Roll** | **Roll:** Tilt sideways | **Roll:** Tilt sideways |
-| 🦴 **3. Joint Bend** | **Joint Yaw:** Rotate shin / forearm | **Joint Pitch:** Bend knee / elbow joint |
-| 🦴 **4. Joint Tilt** | **Joint Roll:** Tilt shin / forearm | **Joint Roll:** Tilt shin / forearm |
-| ↕️ **5. Vertical / Depth** | **Y-Axis:** Move up / down | **Z-Axis:** Move forward / back |
-| ↔️ **6. Horizontal** | **X-Axis:** Move left / right | **X-Axis:** Move left / right |
+| Control | Effect |
+| :--- | :--- |
+| **Left-click axis** | Edit the selected main part |
+| **Right-click axis** | Edit its lower joint in rotation mode |
+| **Scroll** | Apply the configured rotation or translation step |
+| **Shift + Scroll** | Apply the precision step |
+| **F / Swap Hand** | Toggle rotation and translation gizmos |
+| **Shift + Left-click** | Save and leave the editor |
 
-> 💡 **Pro Tip (Sitting Pose):** Select the **Right Leg**, lift the thigh in **Mode 1** (`Shift+Scroll`), switch to **Mode 3**, and bend the knee down (`Shift+Scroll`). Repeat for the Left Leg!
+> 💡 **Pro Tip (Sitting Pose):** Select the **Right Leg**, grab the red rotation ring with
+> left-click to lift the thigh, then grab it with right-click to bend the knee.
 
 ---
 

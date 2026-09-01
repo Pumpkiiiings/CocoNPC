@@ -10,227 +10,236 @@ import org.bukkit.Material;
 import org.bukkit.entity.ItemDisplay;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GizmoManager {
+    private static final int RING_SEGMENTS = 16;
+    private static final float AXIS_LENGTH_ROT = 1.0f;
+    private static final float AXIS_LENGTH_TRANS = 2.0f;
+    private static final float THICKNESS = 0.05f;
+    private static final float GRAB_THRESHOLD = 0.24f;
+    private static final ItemStack RED = new ItemStack(Material.RED_CONCRETE);
+    private static final ItemStack GREEN = new ItemStack(Material.LIME_CONCRETE);
+    private static final ItemStack BLUE = new ItemStack(Material.BLUE_CONCRETE);
+    private static final ItemStack ACTIVE = new ItemStack(Material.WHITE_CONCRETE);
+
     private final CocoNPC plugin;
     private final Map<UUID, EditorAxis> grabbedAxes = new ConcurrentHashMap<>();
     private final Map<UUID, GrabMode> grabbedModes = new ConcurrentHashMap<>();
     private final Map<UUID, GizmoMode> playerModes = new ConcurrentHashMap<>();
-    private final Map<UUID, java.util.List<VirtualItemDisplay>> playerGizmos = new ConcurrentHashMap<>();
-    private static final float AXIS_LENGTH_ROT = 1.0f;
-    private static final float AXIS_LENGTH_TRANS = 2.0f;
-    private static final float THICKNESS = 0.05f;
-    private static final float GRAB_THRESHOLD = 0.45f;
+    private final Map<UUID, List<VirtualItemDisplay>> playerGizmos = new ConcurrentHashMap<>();
 
     public GizmoManager(CocoNPC plugin) {
         this.plugin = plugin;
-        startGizmoTask();
     }
 
-    private void startGizmoTask() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
-                    if (plugin.getSelectionManager().inModify(player)) {
-                        EditorTarget target = plugin.getSelectionManager().getEditorTarget(player);
-                        NpcEntity npc = plugin.getSelectionManager().getSelected(player);
-                        if (npc != null && target != null) {
-                            updateGizmoFor(player, npc, target);
-                        } else {
-                            destroyGizmoFor(player);
-                        }
-                    } else {
-                        destroyGizmoFor(player);
-                    }
-                }
-            }
-        }.runTaskTimerAsynchronously(plugin, 0L, 1L);
+    public void activate(Player player, NpcEntity npc, EditorTarget target) {
+        if (player != null && npc != null && target != null) updateGizmoFor(player, npc, target);
+    }
+
+    public void refresh(Player player) {
+        NpcEntity npc = plugin.getSelectionManager().getSelected(player);
+        EditorTarget target = plugin.getSelectionManager().getEditorTarget(player);
+        if (npc == null || target == null) {
+            destroyGizmoFor(player);
+        } else {
+            updateGizmoFor(player, npc, target);
+        }
     }
 
     private void updateGizmoFor(Player player, NpcEntity npc, EditorTarget target) {
-        ItemPart part = getPrimaryPart(npc, target);
-        if (part == null) return;
-
-        Location npcLoc = npc.getLocation();
-        if (npcLoc == null || npcLoc.getWorld() == null) return;
-
-        Vector3f pos = new Vector3f(part.getTranslation());
-        Location partLoc = npcLoc.clone().add(pos.x, pos.y, pos.z);
+        Location center = getCenter(npc, target);
+        if (center == null || center.getWorld() == null) {
+            destroyGizmoFor(player);
+            return;
+        }
 
         GizmoMode mode = getMode(player);
-        int requiredSize = mode == GizmoMode.TRANSLATION ? 3 : 36;
-        
-        java.util.List<VirtualItemDisplay> gizmos = playerGizmos.computeIfAbsent(player.getUniqueId(), k -> new java.util.ArrayList<>());
-        
+        int requiredSize = mode == GizmoMode.TRANSLATION ? 3 : RING_SEGMENTS * 3;
+        List<VirtualItemDisplay> gizmos = playerGizmos.computeIfAbsent(player.getUniqueId(), ignored -> new ArrayList<>());
         if (gizmos.size() != requiredSize) {
-            for (VirtualItemDisplay v : gizmos) v.destroy(player);
-            gizmos.clear();
-            if (mode == GizmoMode.TRANSLATION) {
-                gizmos.add(createDisplay(partLoc, Material.RED_CONCRETE));
-                gizmos.add(createDisplay(partLoc, Material.LIME_CONCRETE));
-                gizmos.add(createDisplay(partLoc, Material.BLUE_CONCRETE));
-            } else {
-                for (int i = 0; i < 12; i++) gizmos.add(createDisplay(partLoc, Material.RED_CONCRETE));
-                for (int i = 0; i < 12; i++) gizmos.add(createDisplay(partLoc, Material.LIME_CONCRETE));
-                for (int i = 0; i < 12; i++) gizmos.add(createDisplay(partLoc, Material.BLUE_CONCRETE));
+            destroyVisuals(player);
+            gizmos = new ArrayList<>(requiredSize);
+            for (int i = 0; i < requiredSize; i++) {
+                ItemStack item = i < requiredSize / 3 ? RED : i < (requiredSize * 2) / 3 ? GREEN : BLUE;
+                VirtualItemDisplay display = createDisplay(center, item);
+                gizmos.add(display);
+                display.addViewer(player);
             }
-            for (VirtualItemDisplay v : gizmos) v.spawn(player);
-        }
-
-        for (VirtualItemDisplay v : gizmos) {
-            v.setLocation(partLoc);
-        }
-
-        Quaternionf rot = part.getLeftRotation();
-        EditorAxis grabbed = getGrabbedAxis(player);
-
-        if (mode == GizmoMode.TRANSLATION) {
-            float transScaleL = AXIS_LENGTH_TRANS * 2.0f; // Multiplied by 2.0 to counteract the 0.5x FIXED scale and visually reach 1.0 blocks
-            float transScaleT = 0.15f; // Thicker lines
-            Quaternionf noRot = new Quaternionf();
-            updateDisplayTransform(gizmos.get(0), noRot, new Vector3f(transScaleL, transScaleT, transScaleT), new Vector3f(AXIS_LENGTH_TRANS / 2f, 0, 0), grabbed == EditorAxis.X, Material.RED_CONCRETE);
-            updateDisplayTransform(gizmos.get(1), noRot, new Vector3f(transScaleT, transScaleL, transScaleT), new Vector3f(0, AXIS_LENGTH_TRANS / 2f, 0), grabbed == EditorAxis.Y, Material.LIME_CONCRETE);
-            updateDisplayTransform(gizmos.get(2), noRot, new Vector3f(transScaleT, transScaleT, transScaleL), new Vector3f(0, 0, AXIS_LENGTH_TRANS / 2f), grabbed == EditorAxis.Z, Material.BLUE_CONCRETE);
+            playerGizmos.put(player.getUniqueId(), gizmos);
         } else {
-            float radius = AXIS_LENGTH_ROT;
-            for(int i = 0; i < 12; i++) {
-                updateRingSegmentTransform(gizmos.get(i), rot, i, 12, radius, EditorAxis.X, grabbed == EditorAxis.X, Material.RED_CONCRETE);
-            }
-            for(int i = 0; i < 12; i++) {
-                updateRingSegmentTransform(gizmos.get(12 + i), rot, i, 12, radius, EditorAxis.Y, grabbed == EditorAxis.Y, Material.LIME_CONCRETE);
-            }
-            for(int i = 0; i < 12; i++) {
-                updateRingSegmentTransform(gizmos.get(24 + i), rot, i, 12, radius, EditorAxis.Z, grabbed == EditorAxis.Z, Material.BLUE_CONCRETE);
-            }
+            for (VirtualItemDisplay display : gizmos) display.teleport(center);
         }
 
-        for (VirtualItemDisplay v : gizmos) {
-            v.updateMetadata(player);
+        Quaternionf rotation = getLocalTargetRotation(npc, target);
+        EditorAxis grabbed = getGrabbedAxis(player);
+        if (mode == GizmoMode.TRANSLATION) {
+            float length = AXIS_LENGTH_TRANS * 2.0f;
+            float width = 0.15f;
+            updateDisplayTransform(gizmos.get(0), rotation, new Vector3f(length, width, width),
+                    new Vector3f(AXIS_LENGTH_TRANS / 2f, 0, 0), grabbed == EditorAxis.X, RED);
+            updateDisplayTransform(gizmos.get(1), rotation, new Vector3f(width, length, width),
+                    new Vector3f(0, AXIS_LENGTH_TRANS / 2f, 0), grabbed == EditorAxis.Y, GREEN);
+            updateDisplayTransform(gizmos.get(2), rotation, new Vector3f(width, width, length),
+                    new Vector3f(0, 0, AXIS_LENGTH_TRANS / 2f), grabbed == EditorAxis.Z, BLUE);
+        } else {
+            for (int i = 0; i < RING_SEGMENTS; i++) {
+                updateRingSegmentTransform(gizmos.get(i), rotation, i, EditorAxis.X, grabbed == EditorAxis.X, RED);
+                updateRingSegmentTransform(gizmos.get(RING_SEGMENTS + i), rotation, i, EditorAxis.Y, grabbed == EditorAxis.Y, GREEN);
+                updateRingSegmentTransform(gizmos.get(RING_SEGMENTS * 2 + i), rotation, i, EditorAxis.Z, grabbed == EditorAxis.Z, BLUE);
+            }
         }
+        for (VirtualItemDisplay display : gizmos) display.updateMetadata(player);
     }
 
-    private VirtualItemDisplay createDisplay(Location loc, Material material) {
-        VirtualItemDisplay display = new VirtualItemDisplay(loc, new ItemStack(material));
+    private VirtualItemDisplay createDisplay(Location location, ItemStack item) {
+        VirtualItemDisplay display = new VirtualItemDisplay(location, item);
         display.setTransform(ItemDisplay.ItemDisplayTransform.FIXED);
         return display;
     }
 
-    private void updateDisplayTransform(VirtualItemDisplay display, Quaternionf baseRot, Vector3f scale, Vector3f offset, boolean glowing, Material mat) {
-        Vector3f rotatedOffset = new Vector3f(offset).rotate(baseRot);
-        display.setTransformation(rotatedOffset, baseRot, scale, new Quaternionf());
-        
-        if (glowing) {
-            display.setItem(new ItemStack(Material.WHITE_CONCRETE));
-        } else {
-            display.setItem(new ItemStack(mat));
-        }
+    private void updateDisplayTransform(VirtualItemDisplay display, Quaternionf rotation, Vector3f scale,
+                                        Vector3f offset, boolean active, ItemStack baseItem) {
+        display.setTransformation(new Vector3f(offset).rotate(rotation), rotation, scale, new Quaternionf());
+        display.setItem(active ? ACTIVE : baseItem);
     }
 
-    private void updateRingSegmentTransform(VirtualItemDisplay display, Quaternionf baseRot, int i, int total, float radius, EditorAxis axis, boolean glowing, Material mat) {
-        float angle = (float) (i * 2.0 * Math.PI / total);
-        // Multiplied by 2.15f because FIXED ItemDisplay has an inherent 0.5x scale factor for blocks
-        float segmentLength = (float) (2.0 * Math.PI * radius / total) * 2.15f;
-        
-        Vector3f localPos = new Vector3f();
+    private void updateRingSegmentTransform(VirtualItemDisplay display, Quaternionf baseRotation, int index,
+                                            EditorAxis axis, boolean active, ItemStack baseItem) {
+        float angle = (float) (index * 2.0 * Math.PI / RING_SEGMENTS);
+        float segmentLength = (float) (2.0 * Math.PI * AXIS_LENGTH_ROT / RING_SEGMENTS) * 2.15f;
+        Vector3f position = new Vector3f();
         Vector3f tangent = new Vector3f();
-        
-        if (axis == EditorAxis.X) {
-            localPos.set(0, (float)Math.cos(angle) * radius, (float)Math.sin(angle) * radius);
-            tangent.set(0, (float)-Math.sin(angle), (float)Math.cos(angle)).normalize();
-        } else if (axis == EditorAxis.Y) {
-            localPos.set((float)Math.cos(angle) * radius, 0, (float)Math.sin(angle) * radius);
-            tangent.set((float)-Math.sin(angle), 0, (float)Math.cos(angle)).normalize();
-        } else if (axis == EditorAxis.Z) {
-            localPos.set((float)Math.cos(angle) * radius, (float)Math.sin(angle) * radius, 0);
-            tangent.set((float)-Math.sin(angle), (float)Math.cos(angle), 0).normalize();
-        }
-
-        Quaternionf localRot = new Quaternionf().rotationTo(new Vector3f(1,0,0), tangent);
-        
-        Vector3f rotatedPos = new Vector3f(localPos).rotate(baseRot);
-        Quaternionf finalRot = new Quaternionf(baseRot).mul(localRot);
-        Vector3f scale = new Vector3f(segmentLength, THICKNESS, THICKNESS);
-
-        display.setTransformation(rotatedPos, finalRot, scale, new Quaternionf());
-        
-        if (glowing) {
-            display.setItem(new ItemStack(Material.WHITE_CONCRETE));
-        } else {
-            display.setItem(new ItemStack(mat));
-        }
-    }
-
-    public void destroyGizmoFor(Player player) {
-        java.util.List<VirtualItemDisplay> gizmos = playerGizmos.remove(player.getUniqueId());
-        if (gizmos != null) {
-            for (VirtualItemDisplay v : gizmos) {
-                v.destroy(player);
+        switch (axis) {
+            case X -> {
+                position.set(0, (float) Math.cos(angle), (float) Math.sin(angle));
+                tangent.set(0, (float) -Math.sin(angle), (float) Math.cos(angle));
             }
+            case Y -> {
+                position.set((float) Math.cos(angle), 0, (float) Math.sin(angle));
+                tangent.set((float) -Math.sin(angle), 0, (float) Math.cos(angle));
+            }
+            case Z -> {
+                position.set((float) Math.cos(angle), (float) Math.sin(angle), 0);
+                tangent.set((float) -Math.sin(angle), (float) Math.cos(angle), 0);
+            }
+            default -> throw new IllegalArgumentException("A ring requires a concrete axis");
         }
-        grabbedAxes.remove(player.getUniqueId());
-        grabbedModes.remove(player.getUniqueId());
-    }
-
-    public void clearAll() {
-        for (UUID uuid : playerGizmos.keySet()) {
-            Player p = org.bukkit.Bukkit.getPlayer(uuid);
-            if (p != null) destroyGizmoFor(p);
-        }
+        Quaternionf localRotation = new Quaternionf().rotationTo(new Vector3f(1, 0, 0), tangent.normalize());
+        display.setTransformation(
+                position.mul(AXIS_LENGTH_ROT).rotate(baseRotation),
+                new Quaternionf(baseRotation).mul(localRotation),
+                new Vector3f(segmentLength, THICKNESS, THICKNESS),
+                new Quaternionf());
+        display.setItem(active ? ACTIVE : baseItem);
     }
 
     public EditorAxis getLookedAxis(Player player, NpcEntity npc, EditorTarget target) {
-        ItemPart part = getPrimaryPart(npc, target);
-        if (part == null || npc.getLocation() == null) return EditorAxis.NONE;
+        Location center = getCenter(npc, target);
+        if (center == null) return EditorAxis.NONE;
+        Location eye = player.getEyeLocation();
+        Vector3f rayStart = new Vector3f((float) eye.getX(), (float) eye.getY(), (float) eye.getZ());
+        org.bukkit.util.Vector eyeDirection = eye.getDirection();
+        Vector3f rayDirection = new Vector3f((float) eyeDirection.getX(), (float) eyeDirection.getY(),
+                (float) eyeDirection.getZ()).normalize();
+        Vector3f origin = new Vector3f((float) center.getX(), (float) center.getY(), (float) center.getZ());
+        Quaternionf rotation = getWorldTargetRotation(npc, target);
+        Vector3f xAxis = new Vector3f(1, 0, 0).rotate(rotation);
+        Vector3f yAxis = new Vector3f(0, 1, 0).rotate(rotation);
+        Vector3f zAxis = new Vector3f(0, 0, 1).rotate(rotation);
 
-        Location eyeLoc = player.getEyeLocation();
-        Vector3f rayStart = new Vector3f((float) eyeLoc.getX(), (float) eyeLoc.getY(), (float) eyeLoc.getZ());
-        org.bukkit.util.Vector eyeDir = eyeLoc.getDirection();
-        Vector3f rayDir = new Vector3f((float) eyeDir.getX(), (float) eyeDir.getY(), (float) eyeDir.getZ()).normalize();
-
-        Vector3f pos = new Vector3f(part.getTranslation());
-        Location partLoc = npc.getLocation().clone().add(pos.x, pos.y, pos.z);
-        Vector3f segStart = new Vector3f((float) partLoc.getX(), (float) partLoc.getY(), (float) partLoc.getZ());
-
-        GizmoMode mode = getMode(player);
-        Quaternionf hitRot = mode == GizmoMode.TRANSLATION ? new Quaternionf() : part.getLeftRotation();
-        Vector3f xAxis = new Vector3f(1, 0, 0).rotate(hitRot);
-        Vector3f yAxis = new Vector3f(0, 1, 0).rotate(hitRot);
-        Vector3f zAxis = new Vector3f(0, 0, 1).rotate(hitRot);
-
-        double minDistance = GRAB_THRESHOLD;
-        EditorAxis looked = EditorAxis.NONE;
-        
-        if (mode == GizmoMode.TRANSLATION) {
-            Vector3f xEnd = new Vector3f(segStart).add(new Vector3f(xAxis).mul(AXIS_LENGTH_TRANS));
-            Vector3f yEnd = new Vector3f(segStart).add(new Vector3f(yAxis).mul(AXIS_LENGTH_TRANS));
-            Vector3f zEnd = new Vector3f(segStart).add(new Vector3f(zAxis).mul(AXIS_LENGTH_TRANS));
-
-            double dX = GizmoMath.distanceRayToSegment(rayStart, rayDir, segStart, xEnd);
-            double dY = GizmoMath.distanceRayToSegment(rayStart, rayDir, segStart, yEnd);
-            double dZ = GizmoMath.distanceRayToSegment(rayStart, rayDir, segStart, zEnd);
-
-            if (dX < minDistance) { minDistance = dX; looked = EditorAxis.X; }
-            if (dY < minDistance) { minDistance = dY; looked = EditorAxis.Y; }
-            if (dZ < minDistance) { minDistance = dZ; looked = EditorAxis.Z; }
+        double xDistance;
+        double yDistance;
+        double zDistance;
+        if (getMode(player) == GizmoMode.TRANSLATION) {
+            xDistance = distanceToAxis(rayStart, rayDirection, origin, xAxis, AXIS_LENGTH_TRANS);
+            yDistance = distanceToAxis(rayStart, rayDirection, origin, yAxis, AXIS_LENGTH_TRANS);
+            zDistance = distanceToAxis(rayStart, rayDirection, origin, zAxis, AXIS_LENGTH_TRANS);
         } else {
-            double dX = GizmoMath.distanceRayToRing(rayStart, rayDir, segStart, xAxis, AXIS_LENGTH_ROT, 12);
-            double dY = GizmoMath.distanceRayToRing(rayStart, rayDir, segStart, yAxis, AXIS_LENGTH_ROT, 12);
-            double dZ = GizmoMath.distanceRayToRing(rayStart, rayDir, segStart, zAxis, AXIS_LENGTH_ROT, 12);
-
-            if (dX < minDistance) { minDistance = dX; looked = EditorAxis.X; }
-            if (dY < minDistance) { minDistance = dY; looked = EditorAxis.Y; }
-            if (dZ < minDistance) { minDistance = dZ; looked = EditorAxis.Z; }
+            xDistance = GizmoMath.distanceRayToRing(rayStart, rayDirection, origin, xAxis, AXIS_LENGTH_ROT, RING_SEGMENTS);
+            yDistance = GizmoMath.distanceRayToRing(rayStart, rayDirection, origin, yAxis, AXIS_LENGTH_ROT, RING_SEGMENTS);
+            zDistance = GizmoMath.distanceRayToRing(rayStart, rayDirection, origin, zAxis, AXIS_LENGTH_ROT, RING_SEGMENTS);
         }
+        double nearest = GRAB_THRESHOLD;
+        EditorAxis result = EditorAxis.NONE;
+        if (xDistance < nearest) { nearest = xDistance; result = EditorAxis.X; }
+        if (yDistance < nearest) { nearest = yDistance; result = EditorAxis.Y; }
+        if (zDistance < nearest) result = EditorAxis.Z;
+        return result;
+    }
 
-        return looked;
+    private double distanceToAxis(Vector3f rayStart, Vector3f rayDirection, Vector3f origin,
+                                  Vector3f axis, float length) {
+        return GizmoMath.distanceRayToSegment(rayStart, rayDirection, origin,
+                new Vector3f(origin).add(new Vector3f(axis).mul(length)));
+    }
+
+    public Vector3f getAxisDirection(NpcEntity npc, EditorTarget target, EditorAxis axis) {
+        Vector3f direction = switch (axis) {
+            case X -> new Vector3f(1, 0, 0);
+            case Y -> new Vector3f(0, 1, 0);
+            case Z -> new Vector3f(0, 0, 1);
+            default -> new Vector3f();
+        };
+        Quaternionf rotation;
+        if (target == EditorTarget.GLOBAL) {
+            // Global translation changes the Bukkit location, so its delta is world-space.
+            rotation = getWorldTargetRotation(npc, target);
+        } else {
+            // Part offsets are persisted in their parent space. The parent/global transform
+            // is applied later by NpcEntity, so only the part's local rotation belongs here.
+            ItemPart part = getPrimaryPart(npc, target);
+            rotation = part == null ? new Quaternionf() : part.getLocalRotation();
+        }
+        return direction.rotate(rotation);
+    }
+
+    private Location getCenter(NpcEntity npc, EditorTarget target) {
+        Location location = npc.getLocation();
+        if (location == null) return null;
+        if (target == EditorTarget.GLOBAL) return location.clone().add(0, 0.9f * npc.getSize(), 0);
+        ItemPart part = getPrimaryPart(npc, target);
+        if (part == null) return null;
+        Vector3f position = new Vector3f(part.getTranslation()).rotate(getBaseYaw(npc));
+        return location.clone().add(position.x, position.y, position.z);
+    }
+
+    private Quaternionf getLocalTargetRotation(NpcEntity npc, EditorTarget target) {
+        if (target == EditorTarget.GLOBAL) return npc.getGlobalRotation();
+        ItemPart part = getPrimaryPart(npc, target);
+        return part == null ? new Quaternionf() : new Quaternionf(part.getLeftRotation());
+    }
+
+    private Quaternionf getWorldTargetRotation(NpcEntity npc, EditorTarget target) {
+        return getBaseYaw(npc).mul(getLocalTargetRotation(npc, target));
+    }
+
+    private Quaternionf getBaseYaw(NpcEntity npc) {
+        Location location = npc.getLocation();
+        float yaw = location == null ? 0f : location.getYaw();
+        return new Quaternionf().rotationY((float) Math.toRadians(-yaw));
+    }
+
+    private ItemPart getPrimaryPart(NpcEntity npc, EditorTarget target) {
+        String key = switch (target) {
+            case HEAD -> "head";
+            case BODY -> "torsoUpper";
+            case RIGHT_ARM -> "rightArmUpper";
+            case LEFT_ARM -> "leftArmUpper";
+            case RIGHT_LEG -> "rightLegUpper";
+            case LEFT_LEG -> "leftLegUpper";
+            case RIGHT_ITEM -> "right_item";
+            case LEFT_ITEM -> "left_item";
+            default -> null;
+        };
+        return key == null ? null : npc.getPart(key);
     }
 
     public GizmoMode getMode(Player player) {
@@ -238,21 +247,22 @@ public class GizmoManager {
     }
 
     public void toggleMode(Player player) {
-        GizmoMode current = getMode(player);
-        GizmoMode next = current == GizmoMode.ROTATION ? GizmoMode.TRANSLATION : GizmoMode.ROTATION;
+        GizmoMode next = getMode(player) == GizmoMode.ROTATION ? GizmoMode.TRANSLATION : GizmoMode.ROTATION;
         playerModes.put(player.getUniqueId(), next);
-        destroyGizmoFor(player);
-        player.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize("<green>Modo cambiado a: " + next.name()));
+        clearGrab(player);
+        destroyVisuals(player);
+        refresh(player);
+        player.sendMessage(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage()
+                .deserialize("<green>Modo cambiado a: " + next.name()));
     }
 
     public void grabAxis(Player player, EditorAxis axis, GrabMode mode) {
-        if (axis == EditorAxis.NONE) {
-            grabbedAxes.remove(player.getUniqueId());
-            grabbedModes.remove(player.getUniqueId());
-        } else {
+        if (axis == EditorAxis.NONE) clearGrab(player);
+        else {
             grabbedAxes.put(player.getUniqueId(), axis);
             grabbedModes.put(player.getUniqueId(), mode);
         }
+        refresh(player);
     }
 
     public EditorAxis getGrabbedAxis(Player player) {
@@ -264,22 +274,36 @@ public class GizmoManager {
     }
 
     public void releaseAxis(Player player) {
+        clearGrab(player);
+        if (plugin.getSelectionManager().inModify(player)) refresh(player);
+    }
+
+    private void clearGrab(Player player) {
         grabbedAxes.remove(player.getUniqueId());
         grabbedModes.remove(player.getUniqueId());
     }
 
-    private ItemPart getPrimaryPart(NpcEntity npc, EditorTarget type) {
-        String key = switch (type) {
-            case HEAD -> "head";
-            case BODY -> "torsoUpper";
-            case RIGHT_ARM -> "rightArmUpper";
-            case LEFT_ARM -> "leftArmUpper";
-            case RIGHT_LEG -> "rightLegUpper";
-            case LEFT_LEG -> "leftLegUpper";
-            case RIGHT_ITEM -> "right_item";
-            case LEFT_ITEM -> "left_item";
-            default -> null;
-        };
-        return key != null ? npc.getPart(key) : null;
+    private void destroyVisuals(Player player) {
+        List<VirtualItemDisplay> gizmos = playerGizmos.remove(player.getUniqueId());
+        if (gizmos != null) for (VirtualItemDisplay display : gizmos) display.removeViewer(player);
+    }
+
+    public void destroyGizmoFor(Player player) {
+        destroyVisuals(player);
+        UUID id = player.getUniqueId();
+        grabbedAxes.remove(id);
+        grabbedModes.remove(id);
+        playerModes.remove(id);
+    }
+
+    public void clearAll() {
+        for (UUID id : List.copyOf(playerGizmos.keySet())) {
+            Player player = org.bukkit.Bukkit.getPlayer(id);
+            if (player != null) destroyGizmoFor(player);
+        }
+        playerGizmos.clear();
+        grabbedAxes.clear();
+        grabbedModes.clear();
+        playerModes.clear();
     }
 }

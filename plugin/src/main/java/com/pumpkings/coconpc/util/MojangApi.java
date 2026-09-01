@@ -10,15 +10,15 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MojangApi {
     private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
     private static final Gson GSON = new Gson();
-    private final Map<String, String> uuidCache = new HashMap<>();
+    private final Map<String, String> uuidCache = new ConcurrentHashMap<>();
 
     public String fetchMojangSkinUrl(String playerName) {
         String uuid = resolvePlayerUuid(playerName);
@@ -29,6 +29,7 @@ public class MojangApi {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid))
+                    .timeout(Duration.ofSeconds(10))
                     .GET()
                     .build();
 
@@ -68,6 +69,7 @@ public class MojangApi {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("https://api.mojang.com/users/profiles/minecraft/" + playerName))
+                    .timeout(Duration.ofSeconds(10))
                     .GET()
                     .build();
 
@@ -83,7 +85,6 @@ public class MojangApi {
         } catch (Exception ignored) {
         }
         
-        uuidCache.put(playerName, null);
         return null;
     }
 }

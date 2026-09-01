@@ -21,6 +21,14 @@ npc:
   # Minimum 8. Changed live with /coconpc viewdistance <blocks>.
   view-distance: 48
 
+editor:
+  # Scroll-wheel increments used by the 3D gizmo. Holding Shift selects the
+  # precision values. Rotation is measured in degrees and translation in blocks.
+  rotation-step: 5.0
+  precision-rotation-step: 1.0
+  translation-step: 0.05
+  precision-translation-step: 0.01
+
 bedrock:
   # Bedrock clients (via Geyser/Floodgate) do not render Display entities, so CocoNPC
   # NPCs are invisible to them. By default their clicks are ignored, because otherwise

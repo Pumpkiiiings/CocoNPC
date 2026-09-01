@@ -147,6 +147,20 @@ public class ConfigManager {
         return config == null ? 3 : config.getInt("actions.title-duration-seconds", 3);
     }
 
+    public float getEditorRotationStep(boolean precise) {
+        double fallback = precise ? 1.0 : 5.0;
+        double value = config == null ? fallback : config.getDouble(
+                precise ? "editor.precision-rotation-step" : "editor.rotation-step", fallback);
+        return (float) Math.max(0.1, Math.min(45.0, value));
+    }
+
+    public float getEditorTranslationStep(boolean precise) {
+        double fallback = precise ? 0.01 : 0.05;
+        double value = config == null ? fallback : config.getDouble(
+                precise ? "editor.precision-translation-step" : "editor.translation-step", fallback);
+        return (float) Math.max(0.001, Math.min(1.0, value));
+    }
+
     public List<String> getConsoleBlockedCharacters() {
         if (config == null) return List.of(";", "|", "&");
         return config.getStringList("actions.console-blocked-characters",

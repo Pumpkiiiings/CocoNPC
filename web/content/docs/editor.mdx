@@ -34,33 +34,33 @@ Editable parts are head, body, right/left arm, right/left leg, right/left held i
 
 ## Editing modes
 
-Once in 3D editing mode, **right-click into the air** or press **F** (swap hand) to cycle
-through six modes. The current mode is announced in chat.
+Once in 3D editing mode, the editor draws a local three-axis gizmo around the selected
+part. Press **F** (swap hand) to toggle between rotation rings and translation arrows.
 
-| # | Mode | `Scroll` | `Shift + Scroll` |
-| :--- | :--- | :--- | :--- |
-| 1 | **Primary Rotation** | Yaw — turn horizontally | Pitch — tilt forward/back |
-| 2 | **Side Tilt (Roll)** | Roll — tilt sideways | Roll — tilt sideways |
-| 3 | **Joint Bending** | Joint yaw — rotate shin/forearm | Joint pitch — bend knee/elbow |
-| 4 | **Joint Tilt** | Joint roll — tilt shin/forearm | Joint roll — tilt shin/forearm |
-| 5 | **Vertical & Depth** | Y axis — move up/down | Z axis — move forward/back |
-| 6 | **Horizontal** | X axis — move left/right | X axis — move left/right |
+| Control | Effect |
+| :--- | :--- |
+| **Left-click an axis** | Grab the main part on that axis |
+| **Right-click an axis** | Grab the lower joint on that axis (rotation mode) |
+| **Scroll** | Apply one normal step |
+| **Shift + Scroll** | Apply one precision step |
+| **Click again** | Release the active axis |
+| **F / Swap Hand** | Toggle rotation and translation |
 
-Each scroll step is 2 degrees of rotation or 0.04 blocks of movement.
+Defaults are 5° / 0.05 blocks, or 1° / 0.01 blocks while sneaking. All four values are
+configurable under `editor` in `config.yml`.
 
 ### Primary rotation vs joint bending
 
 This is the distinction that makes the editor worth learning:
 
-- **Primary rotation** (modes 1–2) moves the *upper* segment — thigh or upper arm. The
+- **Primary rotation** moves the *upper* segment — thigh or upper arm. The
   lower segment follows it, so the limb stays attached.
-- **Joint bending** (modes 3–4) moves *only* the lower segment — shin or forearm. That is
+- **Joint rotation** moves *only* the lower segment — shin or forearm. That is
   what bends a knee or an elbow.
 
 <Callout type="info">
-  The child segment inherits the parent's **position**, so limbs never come apart. It does
-  not inherit the parent's **rotation** — that is deliberate, and it is what lets you bend
-  a knee independently of the thigh.
+  Child segments inherit the full parent transform. Their own rotation is stored locally,
+  so elbows and knees remain independent without separating from the limb.
 </Callout>
 
 ---
@@ -75,12 +75,11 @@ moment.
 ## Worked example: sitting on a chair
 
 1. `/coconpc edit 1`, then left-click **Right Leg**.
-2. Stay in **mode 1**, `Shift + Scroll` to lift the thigh to horizontal (about -90°).
-3. Right-click / press F twice to reach **mode 3 (Joint Bending)**.
-4. `Shift + Scroll` to bend the knee down until the shin hangs vertically.
+2. Left-click the red rotation ring and `Shift + Scroll` to lift the thigh to about -90°.
+3. Release it, then right-click the appropriate rotation ring to grab the knee joint.
+4. `Shift + Scroll` until the shin hangs vertically.
 5. Shift + left-click to exit. Repeat for **Left Leg**.
-6. Reopen the editor, pick the green **Global** button, and use modes 5 and 6 to drop the
-   NPC onto the seat.
+6. Reopen the editor, pick **Global**, press F for translation and move the NPC onto the seat.
 
 Or skip all of it:
 

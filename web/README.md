@@ -15,6 +15,11 @@ yarn dev
 
 Open http://localhost:3000 with your browser to see the result.
 
+Copy `.env.example` to `.env.local` and set `OPENROUTER_API_KEY` to enable the
+documentation chat. The chat route accepts same-origin JSON requests only and applies
+a process-local rate limit; production deployments with multiple instances should add
+an edge or shared-store rate limiter as an additional layer.
+
 ## Explore
 
 In the project, you can see:

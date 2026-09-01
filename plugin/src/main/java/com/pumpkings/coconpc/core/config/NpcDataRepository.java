@@ -14,6 +14,10 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 public class NpcDataRepository {
@@ -25,6 +29,9 @@ public class NpcDataRepository {
     private static final String LOCATION = "location";
     private static final String SKIN = "skin";
     private static final String PARTS = "parts";
+    private static final String POSE_VERSION = "pose-version";
+    private static final int CURRENT_POSE_VERSION = 2;
+    private static final String GLOBAL_ROTATION = "global-rotation";
     private static final String HOLOGRAM = "hologram";
     private static final String HOLO_LINES = HOLOGRAM + ".lines";
     private static final String HOLO_BILLBOARD = HOLOGRAM + ".billboard";
@@ -78,10 +85,22 @@ public class NpcDataRepository {
     private void write(String id) {
         YamlConfiguration config = cache.get(id);
         if (config == null) return;
+        java.nio.file.Path target = fileFor(id).toPath();
+        java.nio.file.Path temporary = target.resolveSibling(target.getFileName() + ".tmp");
         try {
-            config.save(fileFor(id));
+            Files.writeString(temporary, config.saveToString(), StandardCharsets.UTF_8);
+            try {
+                Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException ignored) {
+                Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException ex) {
             plugin.getLogger().severe("Could not save npcs/" + id + ".yml: " + ex.getMessage());
+        } finally {
+            try {
+                Files.deleteIfExists(temporary);
+            } catch (IOException ignored) {
+            }
         }
     }
 
@@ -103,7 +122,7 @@ public class NpcDataRepository {
         }
     }
 
-    public Map<UUID, NpcData> loadAll() {
+    public synchronized Map<UUID, NpcData> loadAll() {
         Map<UUID, NpcData> result = new LinkedHashMap<>();
 
         for (String id : storedIds()) {
@@ -139,7 +158,7 @@ public class NpcDataRepository {
         return result;
     }
 
-    public Location loadLocation(UUID uuid) {
+    public synchronized Location loadLocation(UUID uuid) {
         String id = uuidToId.get(uuid);
         if (id == null) return null;
 
@@ -161,7 +180,7 @@ public class NpcDataRepository {
                 (float) config.getDouble(LOCATION + ".pitch"));
     }
 
-    public NpcSkin loadSkin(UUID uuid) {
+    public synchronized NpcSkin loadSkin(UUID uuid) {
         String id = uuidToId.get(uuid);
         if (id == null) return null;
 
@@ -175,46 +194,46 @@ public class NpcDataRepository {
         return skin;
     }
 
-    public List<String> getActions(NpcEntity npc) {
+    public synchronized List<String> getActions(NpcEntity npc) {
         String id = idOf(npc);
         return id == null ? List.of() : configFor(id).getStringList(ACTIONS);
     }
 
-    public List<String> getHologramLines(NpcEntity npc) {
+    public synchronized List<String> getHologramLines(NpcEntity npc) {
         String id = idOf(npc);
         if (id == null) return DEFAULT_HOLOGRAM;
         YamlConfiguration config = configFor(id);
         return config.contains(HOLO_LINES) ? config.getStringList(HOLO_LINES) : DEFAULT_HOLOGRAM;
     }
 
-    public String getHologramBillboard(NpcEntity npc) {
+    public synchronized String getHologramBillboard(NpcEntity npc) {
         String id = idOf(npc);
         return id == null ? "CENTER" : configFor(id).getString(HOLO_BILLBOARD, "CENTER");
     }
 
-    public boolean getHologramShadowed(NpcEntity npc) {
+    public synchronized boolean getHologramShadowed(NpcEntity npc) {
         String id = idOf(npc);
         return id == null || configFor(id).getBoolean(HOLO_SHADOW, true);
     }
 
-    public String getHologramBackground(NpcEntity npc) {
+    public synchronized String getHologramBackground(NpcEntity npc) {
         String id = idOf(npc);
         return id == null ? "transparent" : configFor(id).getString(HOLO_BACKGROUND, "transparent");
     }
 
-    public ItemStack getRightHandItem(NpcEntity npc) {
+    public synchronized ItemStack getRightHandItem(NpcEntity npc) {
         String id = idOf(npc);
         return id == null ? new ItemStack(Material.AIR)
                 : configFor(id).getItemStack(HAND_RIGHT, new ItemStack(Material.AIR));
     }
 
-    public ItemStack getLeftHandItem(NpcEntity npc) {
+    public synchronized ItemStack getLeftHandItem(NpcEntity npc) {
         String id = idOf(npc);
         return id == null ? new ItemStack(Material.AIR)
                 : configFor(id).getItemStack(HAND_LEFT, new ItemStack(Material.AIR));
     }
 
-    public NpcData save(NpcEntity npc, String customId) {
+    public synchronized NpcData save(NpcEntity npc, String customId) {
         String newId = customId != null && !customId.isEmpty() ? customId : nextFreeId();
 
         npc.setId(newId);
@@ -248,7 +267,7 @@ public class NpcDataRepository {
         return String.valueOf(max + 1);
     }
 
-    public void saveLocationAndSkin(NpcEntity npc) {
+    public synchronized void saveLocationAndSkin(NpcEntity npc) {
         String id = idOf(npc);
         if (id == null) return;
         YamlConfiguration config = configFor(id);
@@ -275,28 +294,28 @@ public class NpcDataRepository {
         }
     }
 
-    public void saveActions(NpcEntity npc, List<String> actions) {
+    public synchronized void saveActions(NpcEntity npc, List<String> actions) {
         String id = idOf(npc);
         if (id == null) return;
         configFor(id).set(ACTIONS, actions);
         write(id);
     }
 
-    public void saveSize(NpcEntity npc, float size) {
+    public synchronized void saveSize(NpcEntity npc, float size) {
         String id = idOf(npc);
         if (id == null) return;
         configFor(id).set(SIZE_KEY, size);
         write(id);
     }
 
-    public void saveHologram(NpcEntity npc, List<String> lines) {
+    public synchronized void saveHologram(NpcEntity npc, List<String> lines) {
         String id = idOf(npc);
         if (id == null) return;
         configFor(id).set(HOLO_LINES, lines);
         write(id);
     }
 
-    public void saveHologramStyle(NpcEntity npc, String billboard, boolean shadowed, String background) {
+    public synchronized void saveHologramStyle(NpcEntity npc, String billboard, boolean shadowed, String background) {
         String id = idOf(npc);
         if (id == null) return;
         YamlConfiguration config = configFor(id);
@@ -306,7 +325,7 @@ public class NpcDataRepository {
         write(id);
     }
 
-    public void saveHandItems(NpcEntity npc, ItemStack rightHand, ItemStack leftHand) {
+    public synchronized void saveHandItems(NpcEntity npc, ItemStack rightHand, ItemStack leftHand) {
         String id = idOf(npc);
         if (id == null) return;
         YamlConfiguration config = configFor(id);
@@ -315,11 +334,15 @@ public class NpcDataRepository {
         write(id);
     }
 
-    public void saveParts(NpcEntity npc) {
+    public synchronized void saveParts(NpcEntity npc) {
         String id = idOf(npc);
         if (id == null) return;
 
         YamlConfiguration config = configFor(id);
+        config.set(POSE_VERSION, CURRENT_POSE_VERSION);
+        config.set(GLOBAL_ROTATION + ".pitch", npc.getGlobalPitch());
+        config.set(GLOBAL_ROTATION + ".yaw", npc.getGlobalYaw());
+        config.set(GLOBAL_ROTATION + ".roll", npc.getGlobalRoll());
         for (String name : PART_NAMES) {
             ItemPart part = npc.getPart(name);
             if (part == null) continue;
@@ -336,11 +359,16 @@ public class NpcDataRepository {
         write(id);
     }
 
-    public void loadParts(NpcEntity npc) {
+    public synchronized void loadParts(NpcEntity npc) {
         String id = idOf(npc);
         if (id == null) return;
 
         YamlConfiguration config = configFor(id);
+        int poseVersion = config.getInt(POSE_VERSION, 1);
+        npc.setGlobalRotation(
+                (float) config.getDouble(GLOBAL_ROTATION + ".pitch", 0.0),
+                (float) config.getDouble(GLOBAL_ROTATION + ".yaw", 0.0),
+                (float) config.getDouble(GLOBAL_ROTATION + ".roll", 0.0));
         ConfigurationSection parts = config.getConfigurationSection(PARTS);
         if (parts == null) return;
 
@@ -361,10 +389,16 @@ public class NpcDataRepository {
                     (float) section.getDouble("offset_z", 0.0));
             npc.setPartHidden(name, section.getBoolean("hidden", false));
         }
+        if (poseVersion < CURRENT_POSE_VERSION) {
+            npc.migrateLegacyChildRotationsToLocal();
+        }
         npc.updateTransforms();
+        if (poseVersion < CURRENT_POSE_VERSION) {
+            saveParts(npc);
+        }
     }
 
-    public void delete(NpcEntity npc) {
+    public synchronized void delete(NpcEntity npc) {
         String id = idOf(npc);
         if (id == null) return;
 
@@ -377,7 +411,7 @@ public class NpcDataRepository {
         }
     }
 
-    public void invalidateCache() {
+    public synchronized void invalidateCache() {
         cache.clear();
         indexExistingFiles();
     }

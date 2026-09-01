@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
+import com.pumpkings.coconpc.core.npc.TransformMath;
 
 public abstract class AbstractNpcPart implements NpcPart {
     protected VirtualItemDisplay virtualDisplay;
@@ -95,32 +96,33 @@ public abstract class AbstractNpcPart implements NpcPart {
     }
 
     public void setRotation(float pitch, float yaw, float roll) {
-        this.pitch = pitch;
-        this.yaw = yaw;
-        this.roll = roll;
-        leftRotation.rotationXYZ(
-            (float) Math.toRadians(pitch),
-            (float) Math.toRadians(yaw),
-            (float) Math.toRadians(roll)
-        );
+        this.pitch = TransformMath.normalizeDegrees(pitch);
+        this.yaw = TransformMath.normalizeDegrees(yaw);
+        this.roll = TransformMath.normalizeDegrees(roll);
+        leftRotation.set(getLocalRotation());
     }
 
     public void updateTransformRotation(float basePitch, float baseYaw, float baseRoll) {
-        leftRotation.rotationXYZ(
-            (float) Math.toRadians(basePitch + pitch),
-            (float) Math.toRadians(baseYaw + yaw),
-            (float) Math.toRadians(baseRoll + roll)
-        );
+        leftRotation.set(TransformMath.rotation(basePitch, baseYaw, baseRoll)).mul(getLocalRotation());
     }
 
     public float getPitch() { return pitch; }
     public float getYaw() { return yaw; }
     public float getRoll() { return roll; }
     public Quaternionf getLeftRotation() { return leftRotation; }
+    public Quaternionf getLocalRotation() { return TransformMath.rotation(pitch, yaw, roll); }
+
+    public void setEffectiveRotation(Quaternionf rotation) {
+        leftRotation.set(rotation).normalize();
+    }
 
     public void setTranslation(float x, float y, float z) {
         baseTranslation.set(x, y, z);
         translation.set(baseTranslation).add(customOffset);
+    }
+
+    public void setComputedTranslation(Vector3f value) {
+        translation.set(value);
     }
 
     public void setCustomOffset(float x, float y, float z) {

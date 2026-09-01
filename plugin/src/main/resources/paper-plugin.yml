@@ -34,6 +34,7 @@ permissions:
       CocoNPC.clone: true
       CocoNPC.viewdistance: true
       CocoNPC.reload: true
+      CocoNPC.animate: true
   CocoNPC.spawn:
     description: Spawn new NPCs.
     default: op
@@ -75,4 +76,7 @@ permissions:
     default: op
   CocoNPC.reload:
     description: Reload configuration and preload local skins.
+    default: op
+  CocoNPC.animate:
+    description: Play and stop NPC animations.
     default: op

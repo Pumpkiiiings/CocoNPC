@@ -20,6 +20,9 @@ public class NpcEntity {
     private String id = null;
     private ActiveAnimation activeAnimation = null;
     private float size = 1.0F;
+    private float globalPitch;
+    private float globalYaw;
+    private float globalRoll;
 
     private final Map<String, ItemPart> parts = new LinkedHashMap<>();
     private final HitboxPart hitbox = new HitboxPart();
@@ -85,68 +88,76 @@ public class NpcEntity {
     }
 
     public void updateTransforms() {
-        parts.get("head").setTranslation(0, HEAD_Y * size, 0);
-        parts.get("head").setScale(1f * size, 1f * size, 1f * size);
+        org.joml.Quaternionf rootRotation = getGlobalRotation();
+
+        configureRoot(parts.get("head"), new org.joml.Vector3f(0, HEAD_Y * size, 0),
+                new org.joml.Vector3f(size, size, size), rootRotation);
         ItemPart torsoUpper = parts.get("torsoUpper");
-        torsoUpper.setTranslation(0, TORSO_UPPER_Y * size, 0);
-        torsoUpper.setScale(1f * size, 1f * size, 0.5f * size);
+        configureRoot(torsoUpper, new org.joml.Vector3f(0, TORSO_UPPER_Y * size, 0),
+                new org.joml.Vector3f(size, size, 0.5f * size), rootRotation);
         ItemPart torsoLower = parts.get("torsoLower");
-        org.joml.Vector3f bodyPos1 = torsoUpper.getTranslation();
-        org.joml.Vector3f bodyOffset = new org.joml.Vector3f(0, TORSO_LOWER_Y_OFFSET * size, 0).rotate(torsoUpper.getLeftRotation());
-        torsoLower.setTranslation(bodyPos1.x + bodyOffset.x, bodyPos1.y + bodyOffset.y, bodyPos1.z + bodyOffset.z);
-        torsoLower.setScale(1f * size, 0.5f * size, 0.5f * size);
+        configureChild(torsoUpper, torsoLower, new org.joml.Vector3f(0, TORSO_LOWER_Y_OFFSET * size, 0),
+                new org.joml.Vector3f(size, 0.5f * size, 0.5f * size));
+
         ItemPart rightArm1 = parts.get("rightArmUpper");
-        rightArm1.setTranslation(ARM_X_OFFSET * size, ARM_Y * size, 0);
-        rightArm1.setScale(0.5f * size, 1f * size, 0.5f * size);
-        
+        configureRoot(rightArm1, new org.joml.Vector3f(ARM_X_OFFSET * size, ARM_Y * size, 0),
+                new org.joml.Vector3f(0.5f * size, size, 0.5f * size), rootRotation);
         ItemPart rightArm2 = parts.get("rightArmLower");
-        org.joml.Vector3f rightArmPos1 = rightArm1.getTranslation();
-        org.joml.Vector3f rightArmOffset = new org.joml.Vector3f(0, ARM_LOWER_Y_OFFSET * size, 0).rotate(rightArm1.getLeftRotation());
-        rightArm2.setTranslation(rightArmPos1.x + rightArmOffset.x, rightArmPos1.y + rightArmOffset.y, rightArmPos1.z + rightArmOffset.z);
-        rightArm2.setScale(0.5f * size, 0.5f * size, 0.5f * size);
+        configureChild(rightArm1, rightArm2, new org.joml.Vector3f(0, ARM_LOWER_Y_OFFSET * size, 0),
+                new org.joml.Vector3f(0.5f * size, 0.5f * size, 0.5f * size));
+
         ItemPart leftArm1 = parts.get("leftArmUpper");
-        leftArm1.setTranslation(-ARM_X_OFFSET * size, ARM_Y * size, 0);
-        leftArm1.setScale(0.5f * size, 1f * size, 0.5f * size);
-        
+        configureRoot(leftArm1, new org.joml.Vector3f(-ARM_X_OFFSET * size, ARM_Y * size, 0),
+                new org.joml.Vector3f(0.5f * size, size, 0.5f * size), rootRotation);
         ItemPart leftArm2 = parts.get("leftArmLower");
-        org.joml.Vector3f leftArmPos1 = leftArm1.getTranslation();
-        org.joml.Vector3f leftArmOffset = new org.joml.Vector3f(0, ARM_LOWER_Y_OFFSET * size, 0).rotate(leftArm1.getLeftRotation());
-        leftArm2.setTranslation(leftArmPos1.x + leftArmOffset.x, leftArmPos1.y + leftArmOffset.y, leftArmPos1.z + leftArmOffset.z);
-        leftArm2.setScale(0.5f * size, 0.5f * size, 0.5f * size);
+        configureChild(leftArm1, leftArm2, new org.joml.Vector3f(0, ARM_LOWER_Y_OFFSET * size, 0),
+                new org.joml.Vector3f(0.5f * size, 0.5f * size, 0.5f * size));
+
         ItemPart rightItem = parts.get("right_item");
         if (rightItem != null) {
-            org.joml.Vector3f rightHandPos = rightArm2.getTranslation();
-            org.joml.Vector3f rightHandOffset = new org.joml.Vector3f(0, -0.35f * size, 0).rotate(rightArm2.getLeftRotation());
-            rightItem.setTranslation(rightHandPos.x + rightHandOffset.x, rightHandPos.y + rightHandOffset.y, rightHandPos.z + rightHandOffset.z);
-            rightItem.updateTransformRotation(rightArm2.getPitch(), rightArm2.getYaw(), rightArm2.getRoll());
-            rightItem.setScale(0.6f * size, 0.6f * size, 0.6f * size);
+            configureChild(rightArm2, rightItem, new org.joml.Vector3f(0, -0.35f * size, 0),
+                    new org.joml.Vector3f(0.6f * size));
         }
         ItemPart leftItem = parts.get("left_item");
         if (leftItem != null) {
-            org.joml.Vector3f leftHandPos = leftArm2.getTranslation();
-            org.joml.Vector3f leftHandOffset = new org.joml.Vector3f(0, -0.35f * size, 0).rotate(leftArm2.getLeftRotation());
-            leftItem.setTranslation(leftHandPos.x + leftHandOffset.x, leftHandPos.y + leftHandOffset.y, leftHandPos.z + leftHandOffset.z);
-            leftItem.updateTransformRotation(leftArm2.getPitch(), leftArm2.getYaw(), leftArm2.getRoll());
-            leftItem.setScale(0.6f * size, 0.6f * size, 0.6f * size);
+            configureChild(leftArm2, leftItem, new org.joml.Vector3f(0, -0.35f * size, 0),
+                    new org.joml.Vector3f(0.6f * size));
         }
+
         ItemPart rightLeg1 = parts.get("rightLegUpper");
-        rightLeg1.setTranslation(LEG_X_OFFSET * size, LEG_Y * size, 0);
-        rightLeg1.setScale(0.5f * size, 1f * size, 0.5f * size);
-
+        configureRoot(rightLeg1, new org.joml.Vector3f(LEG_X_OFFSET * size, LEG_Y * size, 0),
+                new org.joml.Vector3f(0.5f * size, size, 0.5f * size), rootRotation);
         ItemPart rightLeg2 = parts.get("rightLegLower");
-        org.joml.Vector3f rightLegPos1 = rightLeg1.getTranslation();
-        org.joml.Vector3f rightLegOffset = new org.joml.Vector3f(0, LEG_LOWER_Y_OFFSET * size, 0).rotate(rightLeg1.getLeftRotation());
-        rightLeg2.setTranslation(rightLegPos1.x + rightLegOffset.x, rightLegPos1.y + rightLegOffset.y, rightLegPos1.z + rightLegOffset.z);
-        rightLeg2.setScale(0.5f * size, 0.5f * size, 0.5f * size);
-        ItemPart leftLeg1 = parts.get("leftLegUpper");
-        leftLeg1.setTranslation(-LEG_X_OFFSET * size, LEG_Y * size, 0);
-        leftLeg1.setScale(0.5f * size, 1f * size, 0.5f * size);
+        configureChild(rightLeg1, rightLeg2, new org.joml.Vector3f(0, LEG_LOWER_Y_OFFSET * size, 0),
+                new org.joml.Vector3f(0.5f * size));
 
+        ItemPart leftLeg1 = parts.get("leftLegUpper");
+        configureRoot(leftLeg1, new org.joml.Vector3f(-LEG_X_OFFSET * size, LEG_Y * size, 0),
+                new org.joml.Vector3f(0.5f * size, size, 0.5f * size), rootRotation);
         ItemPart leftLeg2 = parts.get("leftLegLower");
-        org.joml.Vector3f leftLegPos1 = leftLeg1.getTranslation();
-        org.joml.Vector3f leftLegOffset = new org.joml.Vector3f(0, LEG_LOWER_Y_OFFSET * size, 0).rotate(leftLeg1.getLeftRotation());
-        leftLeg2.setTranslation(leftLegPos1.x + leftLegOffset.x, leftLegPos1.y + leftLegOffset.y, leftLegPos1.z + leftLegOffset.z);
-        leftLeg2.setScale(0.5f * size, 0.5f * size, 0.5f * size);
+        configureChild(leftLeg1, leftLeg2, new org.joml.Vector3f(0, LEG_LOWER_Y_OFFSET * size, 0),
+                new org.joml.Vector3f(0.5f * size));
+    }
+
+    private void configureRoot(ItemPart part, org.joml.Vector3f base, org.joml.Vector3f scale,
+                               org.joml.Quaternionf rootRotation) {
+        part.setTranslation(base.x, base.y, base.z);
+        part.setComputedTranslation(new org.joml.Vector3f(part.getTranslation()).rotate(rootRotation));
+        part.setEffectiveRotation(new org.joml.Quaternionf(rootRotation).mul(part.getLocalRotation()));
+        part.setScale(scale.x, scale.y, scale.z);
+    }
+
+    private void configureChild(ItemPart parent, ItemPart child, org.joml.Vector3f localOffset,
+                                org.joml.Vector3f scale) {
+        org.joml.Vector3f base = new org.joml.Vector3f(localOffset)
+                .rotate(parent.getLeftRotation())
+                .add(parent.getTranslation());
+        child.setTranslation(base.x, base.y, base.z);
+        org.joml.Vector3f localCustom = new org.joml.Vector3f(child.getCustomOffset())
+                .rotate(parent.getLeftRotation());
+        child.setComputedTranslation(base.add(localCustom));
+        child.setEffectiveRotation(new org.joml.Quaternionf(parent.getLeftRotation()).mul(child.getLocalRotation()));
+        child.setScale(scale.x, scale.y, scale.z);
     }
 
     public void teleport(Location nLocation) {
@@ -250,13 +261,21 @@ public class NpcEntity {
     }
 
     public void setRotation(EditorTarget type, float pitch, float yaw, float roll) {
-        forEachPart(type, part -> part.setRotation(pitch, yaw, roll));
+        if (type == EditorTarget.GLOBAL) {
+            setGlobalRotation(pitch, yaw, roll);
+        } else {
+            forPrimaryParts(type, part -> part.setRotation(pitch, yaw, roll));
+        }
         refreshTransforms();
     }
 
     public void addRotation(EditorTarget type, float dPitch, float dYaw, float dRoll) {
-        forEachPart(type, part -> part.setRotation(
-                part.getPitch() + dPitch, part.getYaw() + dYaw, part.getRoll() + dRoll));
+        if (type == EditorTarget.GLOBAL) {
+            setGlobalRotation(globalPitch + dPitch, globalYaw + dYaw, globalRoll + dRoll);
+        } else {
+            forPrimaryParts(type, part -> part.setRotation(
+                    part.getPitch() + dPitch, part.getYaw() + dYaw, part.getRoll() + dRoll));
+        }
         refreshTransforms();
     }
 
@@ -273,6 +292,24 @@ public class NpcEntity {
         forPrimaryParts(type, part -> part.addCustomOffset(dX, dY, dZ));
         refreshTransforms();
     }
+
+    public void translate(float dX, float dY, float dZ) {
+        if (location != null) teleport(location.clone().add(dX, dY, dZ));
+    }
+
+    public void setGlobalRotation(float pitch, float yaw, float roll) {
+        this.globalPitch = TransformMath.normalizeDegrees(pitch);
+        this.globalYaw = TransformMath.normalizeDegrees(yaw);
+        this.globalRoll = TransformMath.normalizeDegrees(roll);
+    }
+
+    public org.joml.Quaternionf getGlobalRotation() {
+        return TransformMath.rotation(globalPitch, globalYaw, globalRoll);
+    }
+
+    public float getGlobalPitch() { return globalPitch; }
+    public float getGlobalYaw() { return globalYaw; }
+    public float getGlobalRoll() { return globalRoll; }
 
     public void setOffset(EditorTarget type, float x, float y, float z) {
         forPrimaryParts(type, part -> part.setCustomOffset(x, y, z));
@@ -462,8 +499,40 @@ public class NpcEntity {
     public void setPartRotation(String partName, float pitch, float yaw, float roll) {
         ItemPart part = parts.get(partName);
         if (part != null) {
-            part.setRotation(pitch, yaw, roll);
+            String parentKey = parentKeyFor(partName);
+            if (parentKey == null) {
+                part.setRotation(pitch, yaw, roll);
+            } else {
+                ItemPart parent = parts.get(parentKey);
+                org.joml.Quaternionf local = TransformMath.localFromWorld(
+                        parent.getLeftRotation(), TransformMath.rotation(pitch, yaw, roll));
+                org.joml.Vector3f localDegrees = TransformMath.degrees(local);
+                part.setRotation(localDegrees.x, localDegrees.y, localDegrees.z);
+            }
         }
+    }
+
+    public void migrateLegacyChildRotationsToLocal() {
+        for (String childKey : new String[]{"torsoLower", "rightArmLower", "leftArmLower", "rightLegLower", "leftLegLower"}) {
+            ItemPart child = parts.get(childKey);
+            ItemPart parent = parts.get(parentKeyFor(childKey));
+            org.joml.Quaternionf local = TransformMath.localFromWorld(parent.getLocalRotation(), child.getLocalRotation());
+            org.joml.Vector3f degrees = TransformMath.degrees(local);
+            child.setRotation(degrees.x, degrees.y, degrees.z);
+        }
+    }
+
+    private String parentKeyFor(String childKey) {
+        return switch (childKey) {
+            case "torsoLower" -> "torsoUpper";
+            case "rightArmLower" -> "rightArmUpper";
+            case "leftArmLower" -> "leftArmUpper";
+            case "rightLegLower" -> "rightLegUpper";
+            case "leftLegLower" -> "leftLegUpper";
+            case "right_item" -> "rightArmLower";
+            case "left_item" -> "leftArmLower";
+            default -> null;
+        };
     }
 
     public ItemPart getPart(String partName) {
@@ -471,6 +540,7 @@ public class NpcEntity {
     }
 
     public void resetAllRotations() {
+        setGlobalRotation(0f, 0f, 0f);
         for (ItemPart part : parts.values()) {
             part.setRotation(0f, 0f, 0f);
         }

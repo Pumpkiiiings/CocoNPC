@@ -40,6 +40,12 @@ npc:
   # How far away NPCs become visible, in blocks. Minimum 8.
   view-distance: 48
 
+editor:
+  rotation-step: 5.0
+  precision-rotation-step: 1.0
+  translation-step: 0.05
+  precision-translation-step: 0.01
+
 bedrock:
   # Bedrock clients do not render Display entities, so NPCs are invisible to them.
   # Their clicks are ignored by default.
@@ -65,6 +71,12 @@ Required for generating new skins. Set it with
 
 Also settable live with [`/coconpc viewdistance`](/docs/commands/viewdistance), which
 writes back here.
+
+### editor steps
+
+These four values control scroll-wheel snapping in the 3D editor. Rotation values are
+degrees and translation values are blocks. The precision variants are selected while the
+player is sneaking. Unsafe extremes are clamped by the plugin.
 
 ### bedrock.block-interactions
 

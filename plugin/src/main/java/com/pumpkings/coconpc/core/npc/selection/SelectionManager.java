@@ -66,6 +66,9 @@ public class SelectionManager {
             plugin.getConfigManager().getRepository().saveParts(npc);
             plugin.getConfigManager().getRepository().saveLocationAndSkin(npc);
         }
+        if (plugin.getGizmoManager() != null) {
+            plugin.getGizmoManager().destroyGizmoFor(player);
+        }
         modify.remove(id);
 
         selected.remove(id);
@@ -74,6 +77,14 @@ public class SelectionManager {
 
     public void clear(Player player) {
         UUID id = player.getUniqueId();
+        NpcEntity npc = selected.get(id);
+        if (npc != null) {
+            plugin.getConfigManager().getRepository().saveParts(npc);
+            plugin.getConfigManager().getRepository().saveLocationAndSkin(npc);
+        }
+        if (plugin.getGizmoManager() != null) {
+            plugin.getGizmoManager().destroyGizmoFor(player);
+        }
         selected.remove(id);
         modify.remove(id);
         manualRotate.remove(id);
@@ -96,6 +107,10 @@ public class SelectionManager {
     public void beginModify(Player player, EditorTarget type) {
         modify.put(player.getUniqueId(), type);
         player.getInventory().setHeldItemSlot(4);
+        NpcEntity npc = getSelected(player);
+        if (npc != null && plugin.getGizmoManager() != null) {
+            plugin.getGizmoManager().activate(player, npc, type);
+        }
     }
 
     public void beginManualRotate(Player player, EditorTarget type) {
