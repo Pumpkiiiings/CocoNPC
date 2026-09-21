@@ -154,7 +154,10 @@ public class GizmoManager {
         Vector3f rayDirection = new Vector3f((float) eyeDirection.getX(), (float) eyeDirection.getY(),
                 (float) eyeDirection.getZ()).normalize();
         Vector3f origin = new Vector3f((float) center.getX(), (float) center.getY(), (float) center.getZ());
-        Quaternionf rotation = getWorldTargetRotation(npc, target);
+        GizmoMode mode = getMode(player);
+        Quaternionf rotation = (mode == GizmoMode.TRANSLATION)
+                ? getBaseYaw(npc)
+                : getWorldTargetRotation(npc, target);
         Vector3f xAxis = new Vector3f(1, 0, 0).rotate(rotation);
         Vector3f yAxis = new Vector3f(0, 1, 0).rotate(rotation);
         Vector3f zAxis = new Vector3f(0, 0, 1).rotate(rotation);
@@ -214,11 +217,22 @@ public class GizmoManager {
     private Location getCenter(NpcEntity npc, EditorTarget target) {
         Location location = npc.getLocation();
         if (location == null) return null;
-        if (target == EditorTarget.GLOBAL) return location.clone().add(0, 0.9f * npc.getSize(), 0);
-        ItemPart part = getPrimaryPart(npc, target);
-        if (part == null) return null;
-        Vector3f position = new Vector3f(part.getTranslation()).rotate(getBaseYaw(npc));
-        return location.clone().add(position.x, position.y, position.z);
+        
+        Location center;
+        if (target == EditorTarget.GLOBAL) {
+            center = location.clone().add(0, 0.9f * npc.getSize(), 0);
+        } else {
+            ItemPart part = getPrimaryPart(npc, target);
+            if (part == null) return null;
+            Vector3f position = new Vector3f(part.getTranslation()).rotate(getBaseYaw(npc));
+            center = location.clone().add(position.x, position.y, position.z);
+        }
+        
+        // Ensure the display entity itself has 0 rotation, so our quaternion math
+        // applies correctly in world space without being offset by entity yaw/pitch.
+        center.setYaw(0f);
+        center.setPitch(0f);
+        return center;
     }
 
     private Quaternionf getLocalTargetRotation(NpcEntity npc, EditorTarget target) {
