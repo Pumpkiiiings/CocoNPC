@@ -173,9 +173,9 @@ public class SelectionManager {
         } else if (npc != null) {
             float posStep = right ? -0.04F : 0.04F;
             if (isSneaking) {
-                npc.addOffset(type, posStep, 0, 0);
+                npc.addWorldOffset(type, posStep, 0, 0);
             } else {
-                npc.addOffset(type, 0, posStep, 0);
+                npc.addWorldOffset(type, 0, posStep, 0);
             }
         }
     }

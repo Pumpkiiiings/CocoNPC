@@ -51,7 +51,7 @@ public class NpcInteractListener implements Listener {
                     if (target == com.pumpkings.coconpc.menu.EditorTarget.GLOBAL) {
                         npc.translate(direction.x, direction.y, direction.z);
                     } else {
-                        npc.addOffset(target, direction.x, direction.y, direction.z);
+                        npc.addWorldOffset(target, direction.x, direction.y, direction.z);
                     }
                 } else {
                     float rotationSpeed = plugin.getConfigManager()

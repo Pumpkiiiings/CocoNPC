@@ -293,6 +293,23 @@ public class NpcEntity {
         refreshTransforms();
     }
 
+    public void addWorldOffset(EditorTarget type, float dX, float dY, float dZ) {
+        org.joml.Vector3f worldDelta = new org.joml.Vector3f(dX, dY, dZ);
+        for (String key : primaryKeysFor(type)) {
+            com.pumpkings.coconpc.core.npc.part.ItemPart part = parts.get(key);
+            if (part == null) continue;
+
+            String parentKey = parentKeyFor(key);
+            org.joml.Quaternionf basis = (parentKey == null)
+                    ? getGlobalRotation()
+                    : parts.get(parentKey).getLeftRotation();
+
+            org.joml.Vector3f localDelta = new org.joml.Vector3f(worldDelta).rotate(new org.joml.Quaternionf(basis).conjugate());
+            part.addCustomOffset(localDelta.x, localDelta.y, localDelta.z);
+        }
+        refreshTransforms();
+    }
+
     public void translate(float dX, float dY, float dZ) {
         if (location != null) teleport(location.clone().add(dX, dY, dZ));
     }
