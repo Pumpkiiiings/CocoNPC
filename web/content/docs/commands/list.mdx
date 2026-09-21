@@ -1,0 +1,49 @@
+---
+title: /coconpc list
+description: List every loaded NPC with its id and coordinates.
+---
+
+Prints every NPC currently in the registry, with its numeric id and position.
+
+---
+
+## Syntax
+
+```bash
+/coconpc list
+```
+
+No arguments.
+
+---
+
+## Output
+
+```text
+[CocoNPC] --- Spawned NPCs ---
+ID: 1 - Location: 145.2, 68.0, -210.5
+ID: 2 - Location: -34.8, 71.0, 102.1
+ID: 3 - Location: 0.5, 120.0, 0.5
+```
+
+If nothing is loaded you get `There are no NPCs spawned.` instead.
+
+The exact formatting comes from `NPC_LIST_HEADER` and `NPC_LIST_ENTRY` in `messages.yml`,
+so you can change it.
+
+---
+
+## Why you need it
+
+NPCs are packet-only and invisible to command selectors, so there is no vanilla way to find
+one. This is how you locate them.
+
+The listing is read straight from memory, so it costs nothing and never loads chunks.
+
+Pair it with [`/coconpc tp <id>`](/docs/commands/teleport) to jump to anything you find,
+and use it after a restart to confirm every NPC came back.
+
+<Callout type="info">
+  The list shows coordinates but not world names. An NPC in another dimension still appears
+  — `/coconpc tp` will take you across worlds.
+</Callout>

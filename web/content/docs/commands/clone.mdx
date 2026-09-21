@@ -1,0 +1,51 @@
+---
+title: /coconpc clone
+description: Duplicate an NPC together with its pose, skin, items, actions and hologram.
+---
+
+Creates a full copy of an existing NPC at your current position.
+
+---
+
+## Syntax
+
+```bash
+/coconpc clone <source_id> <new_id>
+```
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<source_id>` | Integer | Yes | The NPC to copy. |
+| `<new_id>` | Integer | Yes | Id for the copy. Rejected if already in use. |
+
+---
+
+## Example
+
+```bash
+/coconpc clone 1 2
+```
+
+Stand where you want the copy before running it — the clone spawns at your feet, facing
+you, not next to the original.
+
+---
+
+## What gets copied
+
+- Skin (reused from cache, so no re-upload and no waiting)
+- Size
+- Every part's rotation and custom offset — the full pose
+- Both hand items
+- Hologram lines, billboard, shadow and background
+- The entire action list
+
+What does not carry over is the position, which is yours, and the id, which you chose.
+
+<Callout type="info">
+  Because the skin comes straight out of the cache, cloning never touches MineSkin. It works
+  even with no API key configured.
+</Callout>
+
+This is the practical way to build a row of guards or a set of matching shopkeepers: pose
+one carefully, then clone it as many times as you need and adjust each copy.

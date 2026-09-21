@@ -1,0 +1,43 @@
+---
+title: /coconpc skin
+description: Change an existing NPC's skin without respawning it.
+---
+
+Re-textures an NPC in place, keeping its id, pose, actions, hologram and position.
+
+---
+
+## Syntax
+
+```bash
+/coconpc skin <id> <skin>
+```
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<id>` | Integer | Yes | Target NPC id. |
+| `<skin>` | String | Yes | Premium player name, texture URL, or a `.png` filename from `plugins/CocoNPC/skins/`. |
+
+---
+
+## Examples
+
+```bash
+/coconpc skin 1 Notch
+/coconpc skin 2 guard          # skins/guard.png
+/coconpc skin 3 https://textures.minecraft.net/texture/abcdef...
+```
+
+---
+
+## Notes
+
+The skin argument goes through exactly the same pipeline as
+[`/coconpc create`](/docs/commands/create): name lookup, slim conversion, eleven crops,
+upload, cache. A skin already in `skins.yml` is applied instantly; a new one takes as long
+as the upload does and needs a MineSkin API key.
+
+Everything except the texture is preserved — this is the command to use when you got a pose
+right and only want to change who is wearing it.
+
+The new skin is written to `npcs/<id>.yml` immediately.

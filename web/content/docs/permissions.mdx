@@ -1,0 +1,70 @@
+---
+title: Permissions
+description: Every permission node CocoNPC registers, and what it unlocks.
+---
+
+All nodes default to **operators**. `CocoNPC.admin` is registered as a parent of every
+other node, so granting it alone gives full access.
+
+---
+
+## Nodes
+
+| Node | Unlocks |
+| :--- | :--- |
+| `CocoNPC.admin` | Everything below, plus `/coconpc setkey`. |
+| `CocoNPC.spawn` | `/coconpc create`, `/coconpc spawn` |
+| `CocoNPC.list` | `/coconpc list` |
+| `CocoNPC.tp` | `/coconpc tp`, `/coconpc teleport` |
+| `CocoNPC.tphere` | `/coconpc tphere` |
+| `CocoNPC.npc.edit` | `/coconpc edit`, and shift + right-clicking an NPC to open its editor |
+| `CocoNPC.npc.delete` | `/coconpc delete` |
+| `CocoNPC.action` | `/coconpc action` |
+| `CocoNPC.pose` | `/coconpc pose` |
+| `CocoNPC.resize` | `/coconpc resize` |
+| `CocoNPC.item` | `/coconpc item`, `/coconpc equip` |
+| `CocoNPC.skin` | `/coconpc skin` |
+| `CocoNPC.clone` | `/coconpc clone` |
+| `CocoNPC.viewdistance` | `/coconpc viewdistance` |
+| `CocoNPC.reload` | `/coconpc reload`, `/coconpc preload` |
+
+---
+
+## Notes worth knowing
+
+**`setkey` has no narrow node.** It writes an API credential to disk, so it requires
+`CocoNPC.admin` outright and cannot be delegated.
+
+**`CocoNPC.npc.edit` also gates the click.** It is checked both by the command and by the
+shift + right-click that opens the editor in-world, so a builder with only this node can
+pose NPCs without being able to create or delete them.
+
+**Tab completion respects permissions.** Players are only suggested the subcommands they
+can actually run.
+
+**No permission is needed to *use* an NPC.** Any player can click one and trigger its
+actions. To restrict that, put a `[require_permission]` condition at the top of the NPC's
+action list — see the [Action Engine](/docs/actions).
+
+---
+
+## Example: a builder role
+
+Someone who should decorate the world but not touch behaviour or wipe anything:
+
+```yaml
+# LuckPerms
+permissions:
+  - CocoNPC.spawn
+  - CocoNPC.npc.edit
+  - CocoNPC.pose
+  - CocoNPC.resize
+  - CocoNPC.item
+  - CocoNPC.skin
+  - CocoNPC.clone
+  - CocoNPC.list
+  - CocoNPC.tp
+```
+
+They can build and arrange NPCs, but cannot delete them, bind commands to them, or change
+plugin settings.

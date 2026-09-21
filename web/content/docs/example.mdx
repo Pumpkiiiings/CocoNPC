@@ -1,0 +1,265 @@
+---
+title: Worked Example
+description: Build one complete NPC from scratch — pose, hologram, actions and conditions.
+---
+
+This walks through a single NPC end to end: a **VIP Dungeon Guard** who greets the player
+by name, checks their rank, charges an entry fee, and teleports them in — once per hour.
+
+Every command below is copy-pasteable. Nothing here needs a config file edited by hand.
+
+---
+
+## 1. Spawn it
+
+Stand where you want the guard, facing the direction they should look *at* — the NPC is
+turned to face you.
+
+```bash
+/coconpc create 1 Notch
+```
+
+The id (`1`) comes first and is required. Everything from here on refers to that id.
+
+<Callout type="info">
+  The first spawn of any skin uploads eleven textures and takes a while. The same skin is
+  instant forever after, so pick your NPC's skin once and reuse it.
+</Callout>
+
+Make it slightly imposing:
+
+```bash
+/coconpc resize 1 1.2
+```
+
+---
+
+## 2. Give it a pose and a weapon
+
+```bash
+/coconpc pose 1 crossed_arms
+```
+
+Then hold a sword and run:
+
+```bash
+/coconpc item 1 right
+```
+
+The item is copied, not taken — the sword stays in your inventory, enchantments and all.
+
+Want a guard who is sitting down instead? `/coconpc pose 1 sit`, then use the **Global**
+button in the editor to drop them onto a chair. See [the 3D editor](/docs/editor).
+
+---
+
+## 3. Label it
+
+Open the editor and configure the hologram:
+
+```bash
+/coconpc edit 1
+```
+
+Shift + right-click the hologram button, then add two lines:
+
+```text
+<gradient:#ffb300:#ff5722><bold>DUNGEON GUARD</bold></gradient>
+<gray>Right-click to enter
+```
+
+Lines take full [MiniMessage](https://docs.advntr.dev/minimessage/format.html) formatting.
+
+---
+
+## 4. Make it do something
+
+Start with the simplest possible action — a greeting:
+
+```bash
+/coconpc action 1 add message <yellow>Halt, <player>. State your business.
+```
+
+Click the NPC. It should greet you by name.
+
+<Callout type="warn">
+  Use `<player>`, not `{player}`. Curly braces are not a placeholder and print literally.
+</Callout>
+
+---
+
+## 5. Add the conditions
+
+Conditions are entries in the same list. When one **fails, the rest of the list is
+skipped** — that is the whole mechanism. So conditions go above the rewards they guard.
+
+Add them in this order:
+
+```bash
+# Must hold the VIP rank
+/coconpc action 1 add require_permission ranks.vip
+
+# Must be able to afford it
+/coconpc action 1 add require_money 500
+
+# Only once per hour
+/coconpc action 1 add cooldown 1h
+```
+
+Then the payload:
+
+```bash
+/coconpc action 1 add console eco take <player> 500
+/coconpc action 1 add title <gold><bold>THE DEEP VAULT
+/coconpc action 1 add subtitle <gray>Good luck, <player>
+/coconpc action 1 add console mv tp <player> vip_dungeon
+```
+
+### Why cooldown goes last
+
+This ordering is deliberate, and getting it wrong is the most common mistake.
+
+`[cooldown]` does not only *check* the timer — it **starts** it the moment it passes. So if
+cooldown sits above `[require_money]` and the player cannot pay, they have already burned
+their hourly attempt and got nothing for it. Put it after every other condition, so it is
+only consumed once entry is actually going ahead.
+
+The same logic applies generally: **cheapest and most likely to fail first, side-effecting
+checks last.**
+
+### require_money never takes the money
+
+It compares a balance, nothing more. Charging the player is the separate `[console] eco take`
+line above. Leave that out and your dungeon is free.
+
+It also reads `%vault_eco_balance%`, so it needs PlaceholderAPI **and** the Vault expansion.
+Without them it blocks the action and says so in the console — see
+`actions.require-money-strict` in [Configuration](/docs/configuration).
+
+---
+
+## 6. Check your work
+
+```bash
+/coconpc action 1 list
+```
+
+```text
+--- Actions for NPC #1 ---
+#1: [message] <yellow>Halt, <player>. State your business.
+#2: [require_permission] ranks.vip
+#3: [require_money] 500
+#4: [cooldown] 1h
+#5: [console] eco take <player> 500
+#6: [title] <gold><bold>THE DEEP VAULT
+#7: [subtitle] <gray>Good luck, <player>
+#8: [console] mv tp <player> vip_dungeon
+```
+
+Note that the greeting is `#1`, above the conditions — so **everyone** gets greeted, and
+only VIPs who can pay get through. That is usually what you want: a locked door should still
+tell you it is locked.
+
+If you would rather the whole interaction be silent for non-VIPs, move the greeting down:
+
+```bash
+/coconpc action 1 remove 1
+/coconpc action 1 add message <yellow>Halt, <player>. State your business.
+```
+
+`add` always appends, so removing and re-adding is how you reorder.
+
+---
+
+## 7. Make a second one
+
+Once the first guard is right, do not build the second by hand:
+
+```bash
+/coconpc clone 1 2
+```
+
+The clone gets the skin, size, pose, both hand items, the hologram and **the entire action
+list** — at your current position. No re-upload, so it works instantly even with no MineSkin
+key. Then adjust just what differs:
+
+```bash
+/coconpc action 2 remove 8
+/coconpc action 2 add console mv tp <player> vip_dungeon_2
+```
+
+---
+
+## What this produced
+
+For reference, the above is stored as this in `npcs/1.yml`:
+
+```yaml
+uuid: 3f2b8c1a-...
+id: 1
+size: 1.2
+location:
+  world: world
+  x: 10.5
+  y: 64.0
+  z: 8.5
+  yaw: 180.0
+  pitch: 0.0
+hologram:
+  lines:
+    - '<gradient:#ffb300:#ff5722><bold>DUNGEON GUARD</bold></gradient>'
+    - '<gray>Right-click to enter'
+  billboard: CENTER
+actions:
+  - '[message] <yellow>Halt, <player>. State your business.'
+  - '[require_permission] ranks.vip'
+  - '[require_money] 500'
+  - '[cooldown] 1h'
+  - '[console] eco take <player> 500'
+  - '[title] <gold><bold>THE DEEP VAULT'
+  - '[subtitle] <gray>Good luck, <player>'
+  - '[console] mv tp <player> vip_dungeon'
+```
+
+The skin and part transforms live in the same file; they are omitted here for brevity.
+
+You can edit that file directly and run `/coconpc reload`, which is often faster than
+re-adding a long chain.
+
+---
+
+## Simpler patterns
+
+Not everything needs conditions. Three that come up constantly:
+
+**A signpost** — no conditions, one line:
+
+```bash
+/coconpc create 2 Villager
+/coconpc action 2 add message <gray>The mines are east of here.
+```
+
+**A free daily reward:**
+
+```bash
+/coconpc action 3 add cooldown 24h
+/coconpc action 3 add console give <player> diamond 1
+/coconpc action 3 add message <green>Come back tomorrow!
+```
+
+**A server hub portal:**
+
+```bash
+/coconpc action 4 add title <aqua>Connecting...
+/coconpc action 4 add server survival
+```
+
+---
+
+## Next
+
+- [Action Engine](/docs/actions) — every tag and condition in detail
+- [The 3D Editor](/docs/editor) — hand-posing limbs and bending joints
+- [Command Reference](/docs/commands) — full syntax for everything used above
+
+Stuck? Ask on the [Discord](https://discord.gg/ydsUw5UJrB).

@@ -1,0 +1,20 @@
+{
+  "title": "Command Reference",
+  "pages": [
+    "index",
+    "create",
+    "edit",
+    "action",
+    "pose",
+    "resize",
+    "item",
+    "skin",
+    "clone",
+    "teleport",
+    "list",
+    "delete",
+    "viewdistance",
+    "setkey",
+    "reload"
+  ]
+}

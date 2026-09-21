@@ -1,0 +1,46 @@
+---
+title: /coconpc resize
+description: Rescale an existing NPC without respawning it.
+---
+
+Changes an NPC's size multiplier in place. The hitbox, shadow and hologram height are all
+recalculated to match.
+
+---
+
+## Syntax
+
+```bash
+/coconpc resize <id> <size>
+```
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<id>` | Integer | Yes | Target NPC id. |
+| `<size>` | Float | Yes | Scale multiplier. `1.0` is a normal player. |
+
+---
+
+## Examples
+
+```bash
+/coconpc resize 1 2.5    # towering boss
+/coconpc resize 2 0.5    # child-sized
+/coconpc resize 3 1.0    # back to normal
+```
+
+Tab completion offers `0.5`, `1.0`, `1.5` and `2.0`, but any float is accepted.
+
+---
+
+## What scales with it
+
+- Every body part's dimensions and the offsets between them
+- The interaction hitbox (`0.8 × 1.8` blocks at scale `1.0`)
+- The body's ground shadow
+- The hologram's height above the head
+
+Manual offsets you applied in the 3D editor are **kept** and re-applied on top of the new
+base positions, so resizing does not throw away your posing work.
+
+The new size is saved immediately.

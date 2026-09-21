@@ -1,0 +1,50 @@
+---
+title: /coconpc item
+description: Place an item in an NPC's hand, or clear it.
+---
+
+Copies whatever you are holding into an NPC's hand.
+
+---
+
+## Syntax
+
+```bash
+/coconpc item <id> <right|left> [clear]
+```
+
+*Alias: `/coconpc equip`*
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<id>` | Integer | Yes | Target NPC id. |
+| `<right\|left>` | String | Yes | Which hand. Accepts `right`/`r` and `left`/`l`. |
+| `[clear]` | Flag | No | Empties the hand instead of filling it. Also accepts `remove`. |
+
+---
+
+## Examples
+
+```bash
+# Hold a diamond sword, then:
+/coconpc item 1 right
+
+# Give the off-hand a shield
+/coconpc item 1 left
+
+# Empty the right hand again
+/coconpc item 1 right clear
+```
+
+---
+
+## Notes
+
+The item is **copied**, not taken — the stack stays in your inventory. Enchantments, custom
+names, lore and all other item data come across with it, so a fully custom item works.
+
+Held items follow the forearm they are attached to, so posing an arm carries the weapon
+with it. They can be rotated and offset independently through the
+[3D editor](/docs/editor) by picking the right or left item button.
+
+Hand items are saved to `npcs/<id>.yml` and restored on restart.

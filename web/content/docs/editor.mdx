@@ -1,0 +1,110 @@
+---
+title: The 3D Editor
+description: Pose limbs, bend joints and reposition NPCs using the in-game scroll editor.
+---
+
+CocoNPC's editor works directly in the world. You select a body part, then use your mouse
+wheel to rotate or move it while watching the result live.
+
+---
+
+## Opening the editor
+
+Either shift + right-click an NPC, or run:
+
+```bash
+/coconpc edit <id>
+```
+
+This opens the **NPC Editor** GUI, one button per body part.
+
+### Clicking a part
+
+| Click | Effect |
+| :--- | :--- |
+| **Left click** | Enter 3D editing mode for that part |
+| **Right click** | Toggle that part's visibility |
+| **Shift + left click** | Type exact rotation values in chat (`pitch yaw roll`) |
+| **Shift + right click** (hologram button) | Open the hologram editor |
+
+Editable parts are head, body, right/left arm, right/left leg, right/left held item, and
+**Global**, which moves or rotates the whole NPC as one piece.
+
+---
+
+## Editing modes
+
+Once in 3D editing mode, the editor draws a local three-axis gizmo around the selected
+part. Press **F** (swap hand) to toggle between rotation rings and translation arrows.
+
+| Control | Effect |
+| :--- | :--- |
+| **Left-click an axis** | Grab the main part on that axis |
+| **Right-click an axis** | Grab the lower joint on that axis (rotation mode) |
+| **Scroll** | Apply one normal step |
+| **Shift + Scroll** | Apply one precision step |
+| **Click again** | Release the active axis |
+| **F / Swap Hand** | Toggle rotation and translation |
+
+Defaults are 5° / 0.05 blocks, or 1° / 0.01 blocks while sneaking. All four values are
+configurable under `editor` in `config.yml`.
+
+### Primary rotation vs joint bending
+
+This is the distinction that makes the editor worth learning:
+
+- **Primary rotation** moves the *upper* segment — thigh or upper arm. The
+  lower segment follows it, so the limb stays attached.
+- **Joint rotation** moves *only* the lower segment — shin or forearm. That is
+  what bends a knee or an elbow.
+
+<Callout type="info">
+  Child segments inherit the full parent transform. Their own rotation is stored locally,
+  so elbows and knees remain independent without separating from the limb.
+</Callout>
+
+---
+
+## Leaving the editor
+
+**Shift + left-click** into the air or at the NPC. Your changes are written to disk at that
+moment.
+
+---
+
+## Worked example: sitting on a chair
+
+1. `/coconpc edit 1`, then left-click **Right Leg**.
+2. Left-click the red rotation ring and `Shift + Scroll` to lift the thigh to about -90°.
+3. Release it, then right-click the appropriate rotation ring to grab the knee joint.
+4. `Shift + Scroll` until the shin hangs vertically.
+5. Shift + left-click to exit. Repeat for **Left Leg**.
+6. Reopen the editor, pick **Global**, press F for translation and move the NPC onto the seat.
+
+Or skip all of it:
+
+```bash
+/coconpc pose 1 sit
+```
+
+Preset poses are a starting point — you can always refine them by hand afterwards.
+
+---
+
+## Hologram editing
+
+From the hologram button you can add and remove lines, and change:
+
+- **Billboard**: `CENTER`, `FIXED`, `VERTICAL`, `HORIZONTAL` — how the text turns to face
+  the viewer.
+- **Shadow**: whether the text is drawn with a drop shadow.
+- **Background**: `transparent`, `default`, or an `#AARRGGBB` / `#RRGGBB` hex value.
+
+Lines accept full [MiniMessage](https://docs.advntr.dev/minimessage/format.html) formatting:
+
+```text
+<gradient:#ff9a00:#ff2e63><bold>QUEST MASTER</bold></gradient>
+<gray>Right-click to begin
+```
+
+While in hologram edit mode, scrolling moves the hologram up and down.

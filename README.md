@@ -1,0 +1,142 @@
+<div align="center">
+
+<img src="https://i.ibb.co/gC6y94s/cocologo.png" alt="CocoNPC" width="560">
+
+**[Documentation](https://coconpc.vercel.app)** &nbsp;•&nbsp; **[Support &amp; bug reports](https://discord.gg/ydsUw5UJrB)**
+
+[![PaperMC](https://img.shields.io/badge/PaperMC-1.21+-343434?style=flat-square&logo=papermc)](https://papermc.io/)
+[![Java](https://img.shields.io/badge/Java-21+-ED8B00?style=flat-square&logo=java)](https://adoptium.net/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+
+</div>
+
+---
+
+**CocoNPC** is a revolutionary, lightweight, and ultra-modular NPC management plugin for modern PaperMC servers (1.21+). Leaving traditional, heavy fake-player systems behind, CocoNPC leverages Minecraft's native `ItemDisplay` and `TextDisplay` entities to deliver extreme modularity, precise anatomical animations, and zero fake-player packet overhead.
+
+---
+
+## 🌟 Why CocoNPC?
+
+* 🚀 **Zero Fake-Player Overhead:** Say goodbye to tab-list glitches and heavy NPC plugins. CocoNPC uses native Display Entities for maximum performance.
+* 🧩 **11-Part Hierarchical Anatomy:** NPCs are built using interconnected parts (Head, Torso, Upper/Lower Arms, Upper/Lower Legs). Moving an arm dynamically moves the forearm!
+* 🤸 **Custom Joint Bending:** Sit, wave, lay down, or cross arms. Bend knees and elbows independently for lifelike custom postures.
+* 🎨 **Smart Skin Management:** Drop a `.png` into the `/skins/` folder and spawn it instantly. CocoNPC automatically crops, fixes slim (Alex) skins to classic (Steve) geometry, and caches them using the MineSkin API.
+* 🎬 **100% Vanilla Blockbench Animations:** Just drop a `.bbmodel` into the `animations/` folder. CocoNPC will natively parse and smoothly play your animations without requiring players to download ANY resource pack!
+* ⚡ **Native TextDisplays:** High-performance, built-in holograms without relying on external dependencies like DecentHolograms.
+
+---
+
+## 🕹️ In-Game 3D Editor
+
+Creating the perfect scene has never been easier. Use our in-game visual editor to pose your NPCs anywhere in 3D space.
+
+1. **Shift + Right-Click** an NPC to open the GUI Editor (`NpcEditorMenu`).
+2. **Left-Click** any body part to enter **3D Editing Mode**.
+3. **Aim at a colored gizmo axis** and click it. Left-click edits the main part;
+   right-click edits the elbow/knee joint. Press **F** to switch rotation/translation.
+
+| Control | Effect |
+| :--- | :--- |
+| **Left-click axis** | Edit the selected main part |
+| **Right-click axis** | Edit its lower joint in rotation mode |
+| **Scroll** | Apply the configured rotation or translation step |
+| **Shift + Scroll** | Apply the precision step |
+| **F / Swap Hand** | Toggle rotation and translation gizmos |
+| **Shift + Left-click** | Save and leave the editor |
+
+> 💡 **Pro Tip (Sitting Pose):** Select the **Right Leg**, grab the red rotation ring with
+> left-click to lift the thigh, then grab it with right-click to bend the knee.
+
+---
+
+## ⚡ Action Engine
+
+Turn your NPCs into interactive server elements! Bind action chains executed when players click them:
+
+* `[message] <text>` - Send a formatted chat message.
+* `[console] <cmd>` - Execute a command from the console.
+* `[player] <cmd>` - Make the player execute a command.
+* `[server] <name>` - Transfer the player across BungeeCord/Velocity.
+* `[title] <text>` - Display an on-screen title.
+* `[sound] <sound_name> [volume] [pitch]` - Play a sound for the player.
+* `[teleport] <world> <x> <y> <z>` - Teleport the player to coordinates.
+* `[actionbar] <text>` - Show an action bar message.
+* `[potion] <effect> <duration_ticks> <amplifier>` - Give a potion effect.
+* `[heal]` - Fully heal the player.
+* `[feed]` - Fully feed the player.
+* `[give_item] <material> [amount]` - Give an item to the player.
+* `[take_item] <material> [amount]` - Take an item from the player.
+
+**Conditions:**
+Stop execution if a condition isn't met:
+* `[require_permission] <perm>` - Requires a specific permission.
+* `[require_money] <amount>` - Requires Vault economy balance.
+* `[cooldown] <time>` - Prevent spam (e.g., `5s`, `10m`, `24h`, `7d`).
+
+---
+
+## 🎬 Blockbench Animations (100% Vanilla)
+
+CocoNPC natively supports playing **Blockbench `.bbmodel`** animations without requiring a resource pack!
+
+### How it works
+Since we use Vanilla Display Entities, models must be based on standard **Player Limbs**. CocoNPC automatically links your animation keyframes to the NPC's 6 body parts: `head`, `body`, `right_arm`, `left_arm`, `right_leg`, and `left_leg`.
+
+### Supported Models
+- Any `.bbmodel` designed for standard player-limb bones (e.g., exported Bedrock player models).
+- The bone names in your Blockbench outliner **MUST** be named exactly: `head`, `body`, `right_arm`, `left_arm`, `right_leg`, or `left_leg`.
+- Custom non-player geometry (like dragons or custom hats) are NOT supported since CocoNPC strictly maps your player skin to the limbs to avoid resource packs.
+
+### How to use
+1. Create or download a player animation in Blockbench.
+2. Drop your `.bbmodel` file directly into `plugins/CocoNPC/animations/`. (Exported Bedrock `.json` animations are also supported).
+3. Restart the server. The plugin will automatically parse and load all the animations inside your model.
+4. Play it in-game using the API or state configs!
+
+---
+
+## 💻 Commands
+
+| Command | Description | Permission |
+| :--- | :--- | :--- |
+| `/coconpc spawn <id> <skin>` | Spawns a new NPC. | `CocoNPC.spawn` |
+| `/coconpc edit <id>` | Opens the visual editor. | `CocoNPC.npc.edit` |
+| `/coconpc tp <id>` | Teleports to the NPC. | `CocoNPC.tp` |
+| `/coconpc list` | Lists all active NPCs. | `CocoNPC.list` |
+| `/coconpc action <id> ...` | Manages click actions. | `CocoNPC.action` |
+| `/coconpc pose <id> <pose>` | Applies a preset pose. | `CocoNPC.pose` |
+| `/coconpc resize <id> <size>` | Resizes an NPC. | `CocoNPC.resize` |
+| `/coconpc item <id> <hand>` | Equips held item to the NPC. | `CocoNPC.item` |
+| `/coconpc reload` | Reloads configuration. | `CocoNPC.reload` |
+
+---
+
+## 🛠️ Building & Installation
+
+### Project Structure
+- `plugin/` - The Java source code for the PaperMC plugin. (Use `./gradlew clean build` here)
+- `web/` - The Next.js documentation website. (Use `npm install` & `npm run dev` here to start the page locally)
+
+### Requirements
+- **PaperMC Server:** `1.21` or newer.
+- **Java:** `21` or newer.
+- **PacketEvents 2.13.0+:** Required for packet rendering.
+
+### Setup
+1. Download `CocoNPC-1.0.0.jar` and drop it into your `plugins` folder.
+2. Start the server to generate `plugins/CocoNPC/config.yml`.
+3. Get a free API key at [mineskin.org/account](https://mineskin.org/account) and add it to your `config.yml` (or use `/coconpc setkey <key>`). **This is required to generate custom skins!**
+4. Drop your Blockbench `.bbmodel` or Bedrock `.json` animations into `plugins/CocoNPC/animations/`.
+5. Drop your `.png` skins in `plugins/CocoNPC/skins/` and run `/coconpc preload`.
+
+### Compile from Source
+```bash
+./gradlew clean build
+```
+The compiled artifact will be located in `build/libs/CocoNPC-1.0.0.jar`.
+
+---
+<div align="center">
+<i>Crafted with ❤️ for modern Minecraft servers.</i>
+</div>

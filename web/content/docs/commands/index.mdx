@@ -1,0 +1,75 @@
+---
+title: Command Overview & Permissions
+description: Full command syntax, argument structure, and the permission node behind each subcommand.
+---
+
+Every CocoNPC command lives under `/coconpc`, aliased to `/npc`.
+
+```bash
+/coconpc <subcommand> [arguments...]
+```
+
+---
+
+## Permissions
+
+`CocoNPC.admin` is a parent of every node below, so granting it alone is enough for a full
+administrator. Each subcommand also has its own node, so you can hand out narrower access.
+
+| Subcommand | Permission |
+| :--- | :--- |
+| `create` / `spawn` | `CocoNPC.spawn` |
+| `list` | `CocoNPC.list` |
+| `tp` / `teleport` | `CocoNPC.tp` |
+| `tphere` | `CocoNPC.tphere` |
+| `delete` | `CocoNPC.npc.delete` |
+| `edit` | `CocoNPC.npc.edit` |
+| `action` | `CocoNPC.action` |
+| `pose` | `CocoNPC.pose` |
+| `resize` | `CocoNPC.resize` |
+| `item` / `equip` | `CocoNPC.item` |
+| `skin` | `CocoNPC.skin` |
+| `clone` | `CocoNPC.clone` |
+| `viewdistance` | `CocoNPC.viewdistance` |
+| `reload` / `preload` | `CocoNPC.reload` |
+| `setkey` | `CocoNPC.admin` only |
+
+All nodes default to operators. `setkey` deliberately has no narrow node — it writes an API
+credential, so it stays admin-only.
+
+`CocoNPC.npc.edit` is also what gates shift + right-clicking an NPC to open its editor.
+
+Tab completion only suggests subcommands you actually have permission to run.
+
+---
+
+## Console support
+
+Commands must be run by a player. They resolve positions from where you are standing and
+open GUIs in your inventory, neither of which the console has.
+
+<Callout type="info">
+  `execute as <player> run coconpc ...` does not work around this. Paper keeps the console
+  as the command's sender, so the command still refuses.
+</Callout>
+
+---
+
+## Subcommand directory
+
+<Cards>
+  <Card title="/coconpc create" description="Spawn a new NPC with an id, skin and optional scale." href="/docs/commands/create" />
+  <Card title="/coconpc edit" description="Open the editor GUI for limbs, items and holograms." href="/docs/commands/edit" />
+  <Card title="/coconpc action" description="Bind click actions, conditions and cooldowns." href="/docs/commands/action" />
+  <Card title="/coconpc pose" description="Apply a preset pose." href="/docs/commands/pose" />
+  <Card title="/coconpc resize" description="Rescale an existing NPC in place." href="/docs/commands/resize" />
+  <Card title="/coconpc item" description="Put an item in an NPC's hand, or clear it." href="/docs/commands/item" />
+  <Card title="/coconpc skin" description="Change an existing NPC's skin." href="/docs/commands/skin" />
+  <Card title="/coconpc clone" description="Duplicate an NPC with its pose, actions and hologram." href="/docs/commands/clone" />
+  <Card title="/coconpc tp & tphere" description="Move yourself to an NPC, or an NPC to you." href="/docs/commands/teleport" />
+  <Card title="/coconpc list" description="List every NPC with its coordinates." href="/docs/commands/list" />
+  <Card title="/coconpc delete" description="Permanently remove an NPC." href="/docs/commands/delete" />
+  <Card title="/coconpc viewdistance" description="Set how far away NPCs become visible." href="/docs/commands/viewdistance" />
+  <Card title="/coconpc setkey" description="Set the MineSkin API key in-game." href="/docs/commands/setkey" />
+  <Card title="/coconpc reload" description="Reload configs, messages and menus." href="/docs/commands/reload" />
+</Cards>
