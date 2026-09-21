@@ -293,8 +293,17 @@ public class NpcEntity {
         refreshTransforms();
     }
 
+    private org.joml.Quaternionf getClientRotation(Location loc) {
+        if (loc == null) return new org.joml.Quaternionf();
+        return new org.joml.Quaternionf()
+                .rotateY((float) Math.toRadians(-loc.getYaw()))
+                .rotateX((float) Math.toRadians(-loc.getPitch()));
+    }
+
     public void addWorldOffset(EditorTarget type, float dX, float dY, float dZ) {
         org.joml.Vector3f worldDelta = new org.joml.Vector3f(dX, dY, dZ);
+        org.joml.Vector3f entityDelta = new org.joml.Vector3f(worldDelta).rotate(getClientRotation(location).conjugate());
+
         for (String key : primaryKeysFor(type)) {
             com.pumpkings.coconpc.core.npc.part.ItemPart part = parts.get(key);
             if (part == null) continue;
@@ -304,7 +313,7 @@ public class NpcEntity {
                     ? getGlobalRotation()
                     : parts.get(parentKey).getLeftRotation();
 
-            org.joml.Vector3f localDelta = new org.joml.Vector3f(worldDelta).rotate(new org.joml.Quaternionf(basis).conjugate());
+            org.joml.Vector3f localDelta = new org.joml.Vector3f(entityDelta).rotate(new org.joml.Quaternionf(basis).conjugate());
             part.addCustomOffset(localDelta.x, localDelta.y, localDelta.z);
         }
         refreshTransforms();
