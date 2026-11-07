@@ -53,8 +53,10 @@ public class NpcPacketInteractListener extends PacketListenerAbstract {
                         List<String> actions = plugin.getConfigManager().getActions(npc);
                         plugin.getActionsManager().runActions(player, actions, npc.getId());
                     }
-                } else if (action == WrapperPlayClientInteractEntity.InteractAction.INTERACT ||
-                           action == WrapperPlayClientInteractEntity.InteractAction.INTERACT_AT) {
+                } else if (action == WrapperPlayClientInteractEntity.InteractAction.INTERACT) {
+                    // Note: INTERACT_AT is intentionally ignored — the client sends both
+                    // INTERACT_AT and INTERACT for every right-click, so processing both
+                    // would execute actions twice. We only handle INTERACT here.
                     if (!player.isSneaking()) {
                         List<String> actions = plugin.getConfigManager().getActions(npc);
                         plugin.getActionsManager().runActions(player, actions, npc.getId());

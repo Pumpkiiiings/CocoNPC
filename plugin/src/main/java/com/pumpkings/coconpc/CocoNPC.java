@@ -38,6 +38,7 @@ public class CocoNPC extends JavaPlugin {
 
    public void onEnable() {
       this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+      this.getServer().getMessenger().registerOutgoingPluginChannel(this, "velocity:player_info");
       this.initClass();
       this.loadConfigs();
       this.mineskinService.preloadSkins(null);
