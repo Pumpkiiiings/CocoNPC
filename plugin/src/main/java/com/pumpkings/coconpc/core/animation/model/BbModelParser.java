@@ -37,14 +37,21 @@ public class BbModelParser {
                         if (kf.data_points == null || kf.data_points.isEmpty()) continue;
                         BlockbenchModel.DataPoint dp = kf.data_points.get(0);
 
-                        Vector3f val = new Vector3f(dp.getX(), dp.getY(), dp.getZ());
-                        Animation.Keyframe animKf = new Animation.Keyframe(kf.time, val, "linear");
-
+                        Animation.Keyframe animKf;
                         if ("rotation".equals(kf.channel)) {
+                            // Rotation keyframes are in degrees — use as-is.
+                            Vector3f val = new Vector3f(dp.getX(), dp.getY(), dp.getZ());
+                            animKf = new Animation.Keyframe(kf.time, val, "linear");
                             rotFrames.put(kf.time, animKf);
                         } else if ("position".equals(kf.channel)) {
+                            // Position keyframes in .bbmodel files are in Blockbench pixel
+                            // units (16 pixels = 1 Minecraft block). Convert to blocks so
+                            // the display-entity translation is applied at the right scale.
+                            Vector3f val = new Vector3f(dp.getX() / 16f, dp.getY() / 16f, dp.getZ() / 16f);
+                            animKf = new Animation.Keyframe(kf.time, val, "linear");
                             posFrames.put(kf.time, animKf);
                         }
+                        // "scale" and other channels are intentionally ignored.
                     }
 
                     if (!rotFrames.isEmpty() || !posFrames.isEmpty()) {

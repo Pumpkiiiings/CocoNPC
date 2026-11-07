@@ -90,9 +90,13 @@ public abstract class AbstractNpcPart implements NpcPart {
     }
 
     public void sendMetadataUpdateToAll() {
-        if (virtualDisplay != null) {
-            virtualDisplay.sendMetadataUpdateToAll();
-        }
+        if (virtualDisplay == null) return;
+        // Always reapply the transformation before broadcasting so that any
+        // pending animTranslation / animRotation changes are reflected in the
+        // packet. Without this call the display entity receives stale data and
+        // animations appear frozen even though the values are updating.
+        applyTransformation();
+        virtualDisplay.sendMetadataUpdateToAll();
     }
 
     public void setRotation(float pitch, float yaw, float roll) {
