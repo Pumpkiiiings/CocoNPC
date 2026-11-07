@@ -58,6 +58,7 @@ public class ActionsManager {
         register(new PotionProcessor());
         register(new HealProcessor());
         register(new FeedProcessor());
+        register(new AnimateProcessor(plugin));
     }
 
     public void runActions(final Player player, final List<String> actions, final String npcId) {

@@ -33,6 +33,7 @@ public class CocoNPC extends JavaPlugin {
    MojangApi mojangApi;
    com.pumpkings.coconpc.core.packet.CocoPacketEngine packetEngine;
    AnimationManager animationManager;
+   AnimatorTask animatorTask;
    com.pumpkings.coconpc.core.npc.selection.GizmoManager gizmoManager;
    public boolean hasNewUpdate = false;
 
@@ -46,7 +47,8 @@ public class CocoNPC extends JavaPlugin {
       this.initListeners();
       this.packetEngine.init();
       this.animationManager.loadAnimations();
-      new AnimatorTask(this).runTaskTimer(this, 1L, 1L);
+      this.animatorTask = new AnimatorTask(this);
+      this.animatorTask.start();
       this.registry.loadAllPersistedNpcs();
 
       for (World world : Bukkit.getWorlds()) {
@@ -62,6 +64,9 @@ public class CocoNPC extends JavaPlugin {
    public void onDisable() {
       if (this.gizmoManager != null) {
          this.gizmoManager.clearAll();
+      }
+      if (this.animatorTask != null) {
+         this.animatorTask.stop();
       }
       if (this.registry != null && this.registry.getNpcs() != null) {
          for (com.pumpkings.coconpc.core.npc.NpcEntity npc : this.registry.getNpcs().values()) {
