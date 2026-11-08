@@ -10,21 +10,28 @@ public class ActiveAnimation {
     private final Animation animation;
     private float currentTime = 0f;
     private boolean finished = false;
+    private final boolean loopOverride;
 
     public ActiveAnimation(Animation animation) {
+        this(animation, true);
+    }
+
+    public ActiveAnimation(Animation animation, boolean loop) {
         this.animation = animation;
+        this.loopOverride = loop;
     }
 
     public void tick(float deltaSeconds) {
         if (finished) return;
         currentTime += deltaSeconds;
 
-        if (currentTime >= animation.getLength()) {
-            if (animation.isLoop()) {
-                currentTime = currentTime % animation.getLength();
+        float len = Math.max(0.05f, animation.getLength());
+        if (currentTime >= len) {
+            if (loopOverride || animation.isLoop()) {
+                currentTime = currentTime % len;
             } else {
                 finished = true;
-                currentTime = animation.getLength();
+                currentTime = len;
             }
         }
     }

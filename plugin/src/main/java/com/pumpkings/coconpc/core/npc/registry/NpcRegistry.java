@@ -251,6 +251,10 @@ public class NpcRegistry {
                     com.pumpkings.coconpc.core.animation.Animation anim = plugin.getAnimationManager().getAnimation(data.animation());
                     if (anim != null) {
                         npc.playAnimation(anim);
+                        plugin.getLogger().info("[CocoNPC] Auto-playing animation \"" + anim.getName() + "\" on NPC #" + data.id());
+                    } else {
+                        plugin.getLogger().warning("[CocoNPC] NPC #" + data.id() + " has saved animation \"" + data.animation()
+                                + "\", but it was not found! Available animations: " + plugin.getAnimationManager().getAvailableAnimationNames());
                     }
                 }
                 npcs.put(uuid, npc);

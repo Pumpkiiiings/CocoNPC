@@ -23,7 +23,10 @@ public class BbModelParser {
             for (BlockbenchModel.Animation bbAnim : model.animations) {
                 if (bbAnim.name == null || bbAnim.animators == null) continue;
 
-                boolean loop = bbAnim.loop != null && bbAnim.loop.equalsIgnoreCase("loop");
+                boolean loop = bbAnim.loop == null || bbAnim.loop.isBlank()
+                        || bbAnim.loop.equalsIgnoreCase("loop")
+                        || bbAnim.loop.equalsIgnoreCase("true")
+                        || bbAnim.loop.equalsIgnoreCase("hold");
                 Map<String, Animation.Bone> bones = new HashMap<>();
 
                 for (Map.Entry<String, BlockbenchModel.Animator> entry : bbAnim.animators.entrySet()) {
@@ -59,7 +62,9 @@ public class BbModelParser {
                     }
                 }
 
-                parsedAnimations.put(bbAnim.name, new Animation(bbAnim.name, loop, bbAnim.length, bones));
+                Animation animObj = new Animation(bbAnim.name, loop, bbAnim.length, bones);
+                parsedAnimations.put(bbAnim.name, animObj);
+                parsedAnimations.putIfAbsent(bbAnim.name.toLowerCase(), animObj);
             }
 
             logger.info("[CocoNPC] Parsed .bbmodel: " + file.getName() + " with " + parsedAnimations.size() + " animations.");

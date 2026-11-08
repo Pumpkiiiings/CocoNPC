@@ -648,6 +648,10 @@ public class NpcEntity {
         return player != null && viewers.contains(player.getUniqueId());
     }
 
+    public boolean hasViewers() {
+        return !viewers.isEmpty();
+    }
+
     public boolean matchesVirtualId(int virtualId) {
         if (hitbox.getVirtualEntityId() == virtualId) return true;
         for (ItemPart part : parts.values()) {

@@ -49,6 +49,8 @@ public class AnimatorTask implements Runnable {
             ActiveAnimation active = npc.getActiveAnimation();
             if (active == null) continue;
 
+            if (!npc.hasViewers()) continue;
+
             active.tick(DELTA_SECONDS);
             if (active.isFinished()) {
                 npc.stopAnimation();

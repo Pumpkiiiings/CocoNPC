@@ -16,4 +16,9 @@ public class WorldLoadListener implements Listener {
     public void onLoadChunk(ChunkLoadEvent event) {
         this.plugin.getRegistry().loadChunk(event.getChunk());
     }
+
+    @EventHandler
+    public void onWorldLoad(org.bukkit.event.world.WorldLoadEvent event) {
+        this.plugin.getRegistry().loadAllPersistedNpcs();
+    }
 }

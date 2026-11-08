@@ -85,7 +85,28 @@ public class AnimationManager {
     }
 
     public Animation getAnimation(String id) {
-        return loadedAnimations.get(id);
+        if (id == null || id.isBlank()) return null;
+        Animation exact = loadedAnimations.get(id);
+        if (exact != null) return exact;
+
+        for (Map.Entry<String, Animation> entry : loadedAnimations.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase(id)) {
+                return entry.getValue();
+            }
+        }
+
+        String clean = id.toLowerCase().replace("animation.model.", "").replace("animation.", "");
+        for (Map.Entry<String, Animation> entry : loadedAnimations.entrySet()) {
+            String keyClean = entry.getKey().toLowerCase().replace("animation.model.", "").replace("animation.", "");
+            if (keyClean.equals(clean)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    public java.util.Set<String> getAvailableAnimationNames() {
+        return java.util.Collections.unmodifiableSet(loadedAnimations.keySet());
     }
 }
 
