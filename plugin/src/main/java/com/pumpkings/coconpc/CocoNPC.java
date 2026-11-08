@@ -72,6 +72,9 @@ public class CocoNPC extends JavaPlugin {
          for (com.pumpkings.coconpc.core.npc.NpcEntity npc : this.registry.getNpcs().values()) {
             this.configmanager.getRepository().saveParts(npc);
             this.configmanager.getRepository().saveLocationAndSkin(npc);
+            if (npc.getActiveAnimationName() != null) {
+               this.configmanager.getRepository().saveAnimation(npc, npc.getActiveAnimationName());
+            }
             npc.destroyForAll();
          }
       }
@@ -125,6 +128,9 @@ public class CocoNPC extends JavaPlugin {
 
    public void loadConfigurations() {
       loadConfigs();
+      if (this.animationManager != null) {
+         this.animationManager.loadAnimations();
+      }
    }
 
    public NpcRegistry getRegistry() {

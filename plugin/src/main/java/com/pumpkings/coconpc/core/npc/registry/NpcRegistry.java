@@ -211,6 +211,15 @@ public class NpcRegistry {
             clone.spawnHologram(srcHoloLines);
             clone.updateTransforms();
 
+            String srcAnim = plugin.getConfigManager().getRepository().getAnimation(source);
+            if (srcAnim != null && !srcAnim.isBlank()) {
+                plugin.getConfigManager().getRepository().saveAnimation(clone, srcAnim);
+                com.pumpkings.coconpc.core.animation.Animation anim = plugin.getAnimationManager().getAnimation(srcAnim);
+                if (anim != null) {
+                    clone.playAnimation(anim);
+                }
+            }
+
             plugin.getSelectionManager().select(player, clone);
             npcs_id.put(uuid, newId);
 
@@ -238,6 +247,12 @@ public class NpcRegistry {
                 plugin.getConfigManager().getRepository().loadParts(npc);
                 npc.spawn();
                 npc.spawnHologram(data.hologramLines());
+                if (data.animation() != null && !data.animation().isBlank()) {
+                    com.pumpkings.coconpc.core.animation.Animation anim = plugin.getAnimationManager().getAnimation(data.animation());
+                    if (anim != null) {
+                        npc.playAnimation(anim);
+                    }
+                }
                 npcs.put(uuid, npc);
                 npcs_id.put(uuid, data.id());
             }

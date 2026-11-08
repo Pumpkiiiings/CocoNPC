@@ -19,6 +19,7 @@ public class NpcEntity {
     private Location location;
     private String id = null;
     private ActiveAnimation activeAnimation = null;
+    private String activeAnimationName = null;
     private float size = 1.0F;
     private float globalPitch;
     private float globalYaw;
@@ -658,14 +659,20 @@ public class NpcEntity {
 
     public void playAnimation(com.pumpkings.coconpc.core.animation.Animation animation) {
         this.activeAnimation = new com.pumpkings.coconpc.core.animation.ActiveAnimation(animation);
+        this.activeAnimationName = animation != null ? animation.getName() : null;
     }
 
     public void stopAnimation() {
         this.activeAnimation = null;
+        this.activeAnimationName = null;
         for (ItemPart part : parts.values()) {
             part.setAnimOffset(new org.joml.Vector3f(), new org.joml.Quaternionf());
             part.sendMetadataUpdateToAll();
         }
+    }
+
+    public String getActiveAnimationName() {
+        return activeAnimationName;
     }
 
     public void applyAnimation(java.util.Map<String, org.joml.Vector3f> posOffsets, java.util.Map<String, org.joml.Quaternionf> rotOffsets) {

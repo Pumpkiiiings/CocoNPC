@@ -23,6 +23,7 @@ public class AnimateCommand extends SubCommand {
             }
             withNpc(player, args[1], npc -> {
                 npc.stopAnimation();
+                plugin.getConfigManager().getRepository().saveAnimation(npc, null);
                 Message.ANIMATION_STOP_SUCCESS.send(plugin, player, "{id}", npc.getId());
             });
         } else {
@@ -38,6 +39,7 @@ public class AnimateCommand extends SubCommand {
                     return;
                 }
                 npc.playAnimation(anim);
+                plugin.getConfigManager().getRepository().saveAnimation(npc, anim.getName());
                 Message.ANIMATE_SUCCESS.send(plugin, player, "{anim}", animName, "{id}", npc.getId());
             });
         }

@@ -100,6 +100,14 @@ public class ConfigManager {
         return repository.getLeftHandItem(npc);
     }
 
+    public void saveAnimation(NpcEntity npc, String animation) {
+        repository.saveAnimation(npc, animation);
+    }
+
+    public String getAnimation(NpcEntity npc) {
+        return repository.getAnimation(npc);
+    }
+
     public NpcDataRepository getRepository() {
         return repository;
     }

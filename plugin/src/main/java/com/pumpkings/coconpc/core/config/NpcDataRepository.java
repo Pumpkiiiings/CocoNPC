@@ -40,6 +40,7 @@ public class NpcDataRepository {
     private static final String HAND_RIGHT = "hands.right";
     private static final String HAND_LEFT = "hands.left";
     private static final String ACTIONS = "actions";
+    private static final String ANIMATION = "animation";
 
     static final java.util.List<String> PART_NAMES = BodyParts.ALL;
 
@@ -151,7 +152,8 @@ public class NpcDataRepository {
                     config.getBoolean(HOLO_SHADOW, true),
                     config.getString(HOLO_BACKGROUND, "transparent"),
                     config.getItemStack(HAND_RIGHT, new ItemStack(Material.AIR)),
-                    config.getItemStack(HAND_LEFT, new ItemStack(Material.AIR))
+                    config.getItemStack(HAND_LEFT, new ItemStack(Material.AIR)),
+                    config.getString(ANIMATION, null)
             ));
             uuidToId.put(uuid, id);
         }
@@ -248,11 +250,12 @@ public class NpcDataRepository {
         config.set(HOLO_SHADOW, true);
         config.set(HOLO_BACKGROUND, "transparent");
         config.set(ACTIONS, List.of());
+        config.set(ANIMATION, npc.getActiveAnimationName());
         writeLocationAndSkin(config, npc);
         write(newId);
 
         return new NpcData(npc.getUUID(), newId, List.of(), npc.getSize(),
-                DEFAULT_HOLOGRAM, "CENTER", true, "transparent");
+                DEFAULT_HOLOGRAM, "CENTER", true, "transparent", new ItemStack(Material.AIR), new ItemStack(Material.AIR), npc.getActiveAnimationName());
     }
 
     private String nextFreeId() {
@@ -332,6 +335,18 @@ public class NpcDataRepository {
         config.set(HAND_RIGHT, rightHand);
         config.set(HAND_LEFT, leftHand);
         write(id);
+    }
+
+    public synchronized void saveAnimation(NpcEntity npc, String animation) {
+        String id = idOf(npc);
+        if (id == null) return;
+        configFor(id).set(ANIMATION, animation);
+        write(id);
+    }
+
+    public synchronized String getAnimation(NpcEntity npc) {
+        String id = idOf(npc);
+        return id == null ? null : configFor(id).getString(ANIMATION, null);
     }
 
     public synchronized void saveParts(NpcEntity npc) {
