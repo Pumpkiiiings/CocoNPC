@@ -133,7 +133,7 @@ Since we use Vanilla Display Entities, models must be based on standard **Player
 - **PacketEvents 2.13.0+:** Required for packet rendering.
 
 ### Setup
-1. Download `CocoNPC-1.2.1.jar` and drop it into your `plugins` folder.
+1. Download `CocoNPC-1.2.2.jar` and drop it into your `plugins` folder.
 2. Start the server to generate `plugins/CocoNPC/config.yml`.
 3. Get a free API key at [mineskin.org/account](https://mineskin.org/account) and add it to your `config.yml` (or use `/coconpc setkey <key>`). **This is required to generate custom skins!**
 4. Drop your Blockbench `.bbmodel` or Bedrock `.json` animations into `plugins/CocoNPC/animations/`.
@@ -143,7 +143,7 @@ Since we use Vanilla Display Entities, models must be based on standard **Player
 ```bash
 ./gradlew clean build
 ```
-The compiled artifact will be located in `build/libs/CocoNPC-1.2.1.jar`.
+The compiled artifact will be located in `build/libs/CocoNPC-1.2.2.jar`.
 
 ---
 <div align="center">

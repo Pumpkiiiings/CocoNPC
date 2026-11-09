@@ -223,6 +223,26 @@ public class NpcCommand implements BasicCommand {
                 options.add("stop");
                 return filter(options, args[5]);
             }
+            if (type.equals("sound")) {
+                return filter(List.of("1.0", "0.5", "2.0"), args[5]);
+            }
+            if (Set.of("give_item", "take_item").contains(type)) {
+                return filter(List.of("1", "16", "32", "64"), args[5]);
+            }
+            if (type.equals("potion")) {
+                return filter(List.of("200", "600", "1200"), args[5]);
+            }
+        }
+
+        if (args.length == 7 && sub.equals("action") && args[2].equalsIgnoreCase("add")) {
+            String type = args[3].toLowerCase();
+            if (type.startsWith("[") && type.endsWith("]")) type = type.substring(1, type.length() - 1);
+            if (type.equals("sound")) {
+                return filter(List.of("1.0", "0.8", "1.2", "1.5"), args[6]);
+            }
+            if (type.equals("potion")) {
+                return filter(List.of("0", "1", "2"), args[6]);
+            }
         }
 
         return List.of();
@@ -264,6 +284,21 @@ public class NpcCommand implements BasicCommand {
         }
         if (type.equals("animate")) {
             return npcIdSuggestions(args[4]);
+        }
+        if (type.equals("sound")) {
+            return Arrays.stream(org.bukkit.Sound.values())
+                    .map(s -> s.name().toLowerCase())
+                    .filter(s -> s.startsWith(args[4].toLowerCase()))
+                    .limit(25)
+                    .collect(Collectors.toList());
+        }
+        if (Set.of("give_item", "take_item").contains(type)) {
+            return Arrays.stream(org.bukkit.Material.values())
+                    .filter(org.bukkit.Material::isItem)
+                    .map(m -> m.name().toLowerCase())
+                    .filter(m -> m.startsWith(args[4].toLowerCase()))
+                    .limit(25)
+                    .collect(Collectors.toList());
         }
         return List.of();
     }

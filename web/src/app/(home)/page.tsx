@@ -54,7 +54,7 @@ export default function HomePage() {
           >
             <div className="static-glow" />
             <span style={{ position: "relative", zIndex: 1, fontSize: "0.88rem", fontWeight: "700", letterSpacing: "1px", color: "#f3f4f6" }}>
-              ✨ COCONPC V1.2.1 • NEXT-GEN DISPLAY ENTITIES
+              ✨ COCONPC V1.2.2 • NEXT-GEN DISPLAY ENTITIES
             </span>
           </motion.div>
 
