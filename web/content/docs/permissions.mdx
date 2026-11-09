@@ -1,25 +1,27 @@
 ---
 title: Permissions
-description: Every permission node CocoNPC registers, and what it unlocks.
+description: All permission nodes registered by CocoNPC and what they unlock.
 ---
 
-All nodes default to **operators**. `CocoNPC.admin` is registered as a parent of every
-other node, so granting it alone gives full access.
+All permission nodes default to **server operators (OP)**.
+
+`CocoNPC.admin` is a wildcard parent of every other node — granting it grants full access to all commands and settings.
 
 ---
 
-## Nodes
+## Permission Nodes Reference
 
-| Node | Unlocks |
+| Permission Node | Unlocks |
 | :--- | :--- |
-| `CocoNPC.admin` | Everything below, plus `/coconpc setkey`. |
+| `CocoNPC.admin` | Full administrator access to all commands, plus `/coconpc setkey`. |
 | `CocoNPC.spawn` | `/coconpc create`, `/coconpc spawn` |
 | `CocoNPC.list` | `/coconpc list` |
 | `CocoNPC.tp` | `/coconpc tp`, `/coconpc teleport` |
 | `CocoNPC.tphere` | `/coconpc tphere` |
-| `CocoNPC.npc.edit` | `/coconpc edit`, and shift + right-clicking an NPC to open its editor |
+| `CocoNPC.npc.edit` | `/coconpc edit`, and shift + right-clicking an NPC to open the editor |
 | `CocoNPC.npc.delete` | `/coconpc delete` |
-| `CocoNPC.action` | `/coconpc action` |
+| `CocoNPC.animate` | `/coconpc animate`, `/coconpc animation_stop` |
+| `CocoNPC.action` | `/coconpc action` (add, list, remove, clear) |
 | `CocoNPC.pose` | `/coconpc pose` |
 | `CocoNPC.resize` | `/coconpc resize` |
 | `CocoNPC.item` | `/coconpc item`, `/coconpc equip` |
@@ -30,33 +32,25 @@ other node, so granting it alone gives full access.
 
 ---
 
-## Notes worth knowing
+## Helpful Details
 
-**`setkey` has no narrow node.** It writes an API credential to disk, so it requires
-`CocoNPC.admin` outright and cannot be delegated.
-
-**`CocoNPC.npc.edit` also gates the click.** It is checked both by the command and by the
-shift + right-click that opens the editor in-world, so a builder with only this node can
-pose NPCs without being able to create or delete them.
-
-**Tab completion respects permissions.** Players are only suggested the subcommands they
-can actually run.
-
-**No permission is needed to *use* an NPC.** Any player can click one and trigger its
-actions. To restrict that, put a `[require_permission]` condition at the top of the NPC's
-action list — see the [Action Engine](/docs/actions).
+- **Admin Only:** `/coconpc setkey` strictly requires `CocoNPC.admin` because it writes your private MineSkin API key to disk.
+- **In-World Editor Guard:** `CocoNPC.npc.edit` is checked both by the command and by Shift + Right-Clicking an NPC in the world.
+- **Player Interactions:** Regular players **do not need any permissions** to click or interact with NPCs! If you want to restrict an NPC to certain players, use the `[require_permission]` condition tag in its action list (see [Action Engine](/docs/actions)).
+- **Tab Completion:** Tab suggestions dynamically filter out subcommands the player does not have permission to execute.
 
 ---
 
-## Example: a builder role
+## Example: Builder Role
 
-Someone who should decorate the world but not touch behaviour or wipe anything:
+If you want builders to pose, skin, and place NPCs without letting them run console commands or delete critical server NPCs:
 
 ```yaml
-# LuckPerms
+# In LuckPerms or your permissions plugin
 permissions:
   - CocoNPC.spawn
   - CocoNPC.npc.edit
+  - CocoNPC.animate
   - CocoNPC.pose
   - CocoNPC.resize
   - CocoNPC.item
@@ -65,6 +59,3 @@ permissions:
   - CocoNPC.list
   - CocoNPC.tp
 ```
-
-They can build and arrange NPCs, but cannot delete them, bind commands to them, or change
-plugin settings.

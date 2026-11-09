@@ -67,6 +67,7 @@ Turn your NPCs into interactive server elements! Bind action chains executed whe
 * `[feed]` - Fully feed the player.
 * `[give_item] <material> [amount]` - Give an item to the player.
 * `[take_item] <material> [amount]` - Take an item from the player.
+* `[animate] <npc_id> <animation|stop>` - Trigger a Blockbench animation on an NPC.
 
 **Conditions:**
 Stop execution if a condition isn't met:
@@ -90,9 +91,10 @@ Since we use Vanilla Display Entities, models must be based on standard **Player
 
 ### How to use
 1. Create or download a player animation in Blockbench.
-2. Drop your `.bbmodel` file directly into `plugins/CocoNPC/animations/`. (Exported Bedrock `.json` animations are also supported).
-3. Restart the server. The plugin will automatically parse and load all the animations inside your model.
-4. Play it in-game using the API or state configs!
+2. Drop your `.bbmodel` or `.json` file directly into `plugins/CocoNPC/animations/`.
+3. Run `/coconpc reload` (or restart the server).
+4. Play it in-game: `/coconpc animate <id> <animation>`!
+5. Stop it with `/coconpc animation_stop <id>`. Active animations automatically save and loop across server restarts!
 
 ---
 
@@ -100,15 +102,22 @@ Since we use Vanilla Display Entities, models must be based on standard **Player
 
 | Command | Description | Permission |
 | :--- | :--- | :--- |
-| `/coconpc spawn <id> <skin>` | Spawns a new NPC. | `CocoNPC.spawn` |
-| `/coconpc edit <id>` | Opens the visual editor. | `CocoNPC.npc.edit` |
+| `/coconpc spawn <id> <skin> [size]` | Spawns a new NPC. | `CocoNPC.spawn` |
+| `/coconpc edit <id>` | Opens the 3D visual editor. | `CocoNPC.npc.edit` |
+| `/coconpc animate <id> <anim>` | Plays a Blockbench animation. | `CocoNPC.animate` |
+| `/coconpc animation_stop <id>` | Stops an NPC's animation. | `CocoNPC.animate` |
 | `/coconpc tp <id>` | Teleports to the NPC. | `CocoNPC.tp` |
+| `/coconpc tphere <id>` | Teleports the NPC to you. | `CocoNPC.tphere` |
 | `/coconpc list` | Lists all active NPCs. | `CocoNPC.list` |
 | `/coconpc action <id> ...` | Manages click actions. | `CocoNPC.action` |
 | `/coconpc pose <id> <pose>` | Applies a preset pose. | `CocoNPC.pose` |
 | `/coconpc resize <id> <size>` | Resizes an NPC. | `CocoNPC.resize` |
 | `/coconpc item <id> <hand>` | Equips held item to the NPC. | `CocoNPC.item` |
-| `/coconpc reload` | Reloads configuration. | `CocoNPC.reload` |
+| `/coconpc clone <id> [new_id]` | Duplicates an NPC. | `CocoNPC.clone` |
+| `/coconpc delete <id>` | Deletes an NPC. | `CocoNPC.npc.delete` |
+| `/coconpc viewdistance [dist]` | Gets or sets render distance. | `CocoNPC.viewdistance` |
+| `/coconpc setkey <key>` | Sets MineSkin API key. | `CocoNPC.admin` |
+| `/coconpc reload` | Reloads configs and animations. | `CocoNPC.reload` |
 
 ---
 
@@ -124,7 +133,7 @@ Since we use Vanilla Display Entities, models must be based on standard **Player
 - **PacketEvents 2.13.0+:** Required for packet rendering.
 
 ### Setup
-1. Download `CocoNPC-1.0.0.jar` and drop it into your `plugins` folder.
+1. Download `CocoNPC-1.2.1.jar` and drop it into your `plugins` folder.
 2. Start the server to generate `plugins/CocoNPC/config.yml`.
 3. Get a free API key at [mineskin.org/account](https://mineskin.org/account) and add it to your `config.yml` (or use `/coconpc setkey <key>`). **This is required to generate custom skins!**
 4. Drop your Blockbench `.bbmodel` or Bedrock `.json` animations into `plugins/CocoNPC/animations/`.
@@ -134,7 +143,7 @@ Since we use Vanilla Display Entities, models must be based on standard **Player
 ```bash
 ./gradlew clean build
 ```
-The compiled artifact will be located in `build/libs/CocoNPC-1.0.0.jar`.
+The compiled artifact will be located in `build/libs/CocoNPC-1.2.1.jar`.
 
 ---
 <div align="center">

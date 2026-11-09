@@ -24,6 +24,8 @@ public class NpcCommand implements BasicCommand {
     public static final List<String> ACTION_TYPES = List.of(
             "message", "console", "player", "chat", "broadcast",
             "give_exp", "take_exp", "server", "title", "subtitle",
+            "sound", "teleport", "actionbar", "potion", "heal", "feed",
+            "give_item", "take_item", "animate",
             "require_permission", "require_money", "cooldown");
 
     public static final Map<String, String> PERMISSIONS = Map.ofEntries(
@@ -191,6 +193,7 @@ public class NpcCommand implements BasicCommand {
                         .map(NpcPose::getName)
                         .filter(s -> s.toLowerCase().startsWith(args[2].toLowerCase()))
                         .collect(Collectors.toList());
+                case "animate" -> filter(new ArrayList<>(plugin.getAnimationManager().getAvailableAnimationNames()), args[2]);
                 case "action" -> filter(List.of("list", "add", "remove", "clear"), args[2]);
                 case "create", "spawn", "skin" -> skinSuggestions(args[2]);
                 case "resize" -> filter(List.of("0.5", "1.0", "1.5", "2.0"), args[2]);
@@ -210,6 +213,16 @@ public class NpcCommand implements BasicCommand {
 
         if (args.length == 5 && sub.equals("action") && args[2].equalsIgnoreCase("add")) {
             return suggestActionValue(args);
+        }
+
+        if (args.length == 6 && sub.equals("action") && args[2].equalsIgnoreCase("add")) {
+            String type = args[3].toLowerCase();
+            if (type.startsWith("[") && type.endsWith("]")) type = type.substring(1, type.length() - 1);
+            if (type.equals("animate")) {
+                List<String> options = new ArrayList<>(plugin.getAnimationManager().getAvailableAnimationNames());
+                options.add("stop");
+                return filter(options, args[5]);
+            }
         }
 
         return List.of();
@@ -248,6 +261,9 @@ public class NpcCommand implements BasicCommand {
         }
         if (type.equals("server") || type.equals("connect")) {
             return filter(List.of("lobby", "survival"), args[4]);
+        }
+        if (type.equals("animate")) {
+            return npcIdSuggestions(args[4]);
         }
         return List.of();
     }

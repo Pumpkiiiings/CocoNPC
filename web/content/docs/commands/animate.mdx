@@ -1,0 +1,48 @@
+---
+title: /coconpc animate
+description: Play and stop custom Blockbench animations on an NPC.
+---
+
+Play or stop custom Blockbench `.bbmodel` or Bedrock `.json` animations on your NPCs without requiring a resource pack.
+
+---
+
+## Syntax
+
+```bash
+/coconpc animate <id> <animation>
+/coconpc animation_stop <id>
+```
+
+| Parameter | Type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<id>` | Integer | Yes | The target NPC id. |
+| `<animation>` | String | Yes | Name of the animation inside your `.bbmodel` or `.json` file (case-insensitive). |
+
+**Permission:** `CocoNPC.animate` (or `CocoNPC.admin`)
+
+---
+
+## Examples
+
+```bash
+# Play the "wave" animation on NPC #1
+/coconpc animate 1 wave
+
+# Play an "idle" or "walk" animation on NPC #2
+/coconpc animate 2 idle
+
+# Stop the active animation on NPC #1
+/coconpc animation_stop 1
+```
+
+---
+
+## How It Works & Persistence
+
+- **Saved Automatically:** When you run `/coconpc animate <id> <animation>`, CocoNPC automatically saves the active animation into `npcs/<id>.yml`. When your server restarts, reboots, or reloads, the NPC will **automatically resume** playing the animation.
+- **Stopping:** Running `/coconpc animation_stop <id>` stops the animation and clears it from `npcs/<id>.yml`.
+- **Zero Resource Packs:** Animations are rendered using packet-based mathematical quaternion interpolation (`Slerp`) on vanilla Display Entities. Players do not need to download any resource packs.
+- **Adding New Animations:** Place your `.bbmodel` or `.json` files in `plugins/CocoNPC/animations/` and run `/coconpc reload`.
+
+For complete details on creating models in Blockbench and required bone names, see the [Blockbench Animations Guide](/docs/animations).

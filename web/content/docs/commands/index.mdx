@@ -16,23 +16,24 @@ Every CocoNPC command lives under `/coconpc`, aliased to `/npc`.
 `CocoNPC.admin` is a parent of every node below, so granting it alone is enough for a full
 administrator. Each subcommand also has its own node, so you can hand out narrower access.
 
-| Subcommand | Permission |
-| :--- | :--- |
-| `create` / `spawn` | `CocoNPC.spawn` |
-| `list` | `CocoNPC.list` |
-| `tp` / `teleport` | `CocoNPC.tp` |
-| `tphere` | `CocoNPC.tphere` |
-| `delete` | `CocoNPC.npc.delete` |
-| `edit` | `CocoNPC.npc.edit` |
-| `action` | `CocoNPC.action` |
-| `pose` | `CocoNPC.pose` |
-| `resize` | `CocoNPC.resize` |
-| `item` / `equip` | `CocoNPC.item` |
-| `skin` | `CocoNPC.skin` |
-| `clone` | `CocoNPC.clone` |
-| `viewdistance` | `CocoNPC.viewdistance` |
-| `reload` / `preload` | `CocoNPC.reload` |
-| `setkey` | `CocoNPC.admin` only |
+| Subcommand | Permission | Description |
+| :--- | :--- | :--- |
+| `create` / `spawn` | `CocoNPC.spawn` | Spawn a new NPC |
+| `list` | `CocoNPC.list` | List all NPCs and locations |
+| `tp` / `teleport` | `CocoNPC.tp` | Teleport to an NPC |
+| `tphere` | `CocoNPC.tphere` | Teleport an NPC to your location |
+| `delete` | `CocoNPC.npc.delete` | Delete an NPC |
+| `edit` | `CocoNPC.npc.edit` | Open the 3D editor GUI |
+| `animate` / `animation_stop` | `CocoNPC.animate` | Play or stop Blockbench animations |
+| `action` | `CocoNPC.action` | Add, remove, list, or clear click actions |
+| `pose` | `CocoNPC.pose` | Apply a preset pose |
+| `resize` | `CocoNPC.resize` | Change the size/scale of an NPC |
+| `item` / `equip` | `CocoNPC.item` | Set or clear held hand items |
+| `skin` | `CocoNPC.skin` | Change the skin of an NPC |
+| `clone` | `CocoNPC.clone` | Duplicate an NPC completely |
+| `viewdistance` | `CocoNPC.viewdistance` | Get or set the NPC render distance |
+| `reload` / `preload` | `CocoNPC.reload` | Reload configs and animation files |
+| `setkey` | `CocoNPC.admin` only | Set the MineSkin API key |
 
 All nodes default to operators. `setkey` deliberately has no narrow node — it writes an API
 credential, so it stays admin-only.
@@ -45,7 +46,7 @@ Tab completion only suggests subcommands you actually have permission to run.
 
 ## Console support
 
-Commands must be run by a player. They resolve positions from where you are standing and
+Commands must be run by a player in-game. They resolve positions from where you are standing and
 open GUIs in your inventory, neither of which the console has.
 
 <Callout type="info">
@@ -60,6 +61,7 @@ open GUIs in your inventory, neither of which the console has.
 <Cards>
   <Card title="/coconpc create" description="Spawn a new NPC with an id, skin and optional scale." href="/docs/commands/create" />
   <Card title="/coconpc edit" description="Open the editor GUI for limbs, items and holograms." href="/docs/commands/edit" />
+  <Card title="/coconpc animate" description="Play or stop Blockbench animations without resource packs." href="/docs/commands/animate" />
   <Card title="/coconpc action" description="Bind click actions, conditions and cooldowns." href="/docs/commands/action" />
   <Card title="/coconpc pose" description="Apply a preset pose." href="/docs/commands/pose" />
   <Card title="/coconpc resize" description="Rescale an existing NPC in place." href="/docs/commands/resize" />
@@ -71,5 +73,5 @@ open GUIs in your inventory, neither of which the console has.
   <Card title="/coconpc delete" description="Permanently remove an NPC." href="/docs/commands/delete" />
   <Card title="/coconpc viewdistance" description="Set how far away NPCs become visible." href="/docs/commands/viewdistance" />
   <Card title="/coconpc setkey" description="Set the MineSkin API key in-game." href="/docs/commands/setkey" />
-  <Card title="/coconpc reload" description="Reload configs, messages and menus." href="/docs/commands/reload" />
+  <Card title="/coconpc reload" description="Reload configs, messages, and animations." href="/docs/commands/reload" />
 </Cards>

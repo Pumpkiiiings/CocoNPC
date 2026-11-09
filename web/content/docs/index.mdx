@@ -1,79 +1,58 @@
 ---
 title: Welcome to CocoNPC
-description: Lightweight, fully packet-driven Minecraft NPCs built from Display Entities.
+description: High-performance, packet-based Minecraft NPCs with Blockbench animations and in-game 3D posing.
 ---
 
-CocoNPC builds NPCs out of Minecraft's native **Item Display** and **Text Display** entities
-instead of simulated living mobs. Each NPC is eleven interconnected player heads — one per
-anatomical part — which is what makes limb-level posing possible at all.
+**CocoNPC** is a modern Minecraft NPC plugin built completely on native **Display Entities** and network packets.
 
-Nothing is spawned into the world. Every part, hitbox and hologram exists only as packets
-sent to the players near it, so an NPC costs the server no entity ticks, no AI, and no
-pathfinding.
+Instead of spawning heavy living mobs with pathfinding AI, CocoNPC streams lightweight display packets only to nearby players. This means having 100 NPCs costs the exact same server tick time as having zero!
 
 ---
 
-## What that architecture buys you
+## ⚡ Core Features
 
-1. **No entity tick cost.** NPCs are not world entities. They do not tick, path, collide or
-   get saved into region files, so a hundred NPCs cost the same per-tick as zero.
-2. **Per-limb control.** Rotation, joint bending and offsets are applied to individual body
-   parts, down to fractions of a degree. Sitting, kneeling and crossed arms are just
-   transforms, not animations.
-3. **Nothing to clean up.** Because no real entities exist, an NPC can never be killed by a
-   stray `/kill @e`, dropped by a chunk wipe, or duplicated by a rollback. State lives in
-   `npcs/<id>.yml`.
-4. **Persistent action chains.** Click triggers, console dispatches, economy and permission
-   checks are stored as YAML and survive restarts.
-
-<Callout type="info">
-  Because NPCs are packet-only, they are invisible to command selectors. `/kill @e`,
-  `/data get entity`, and third-party entity viewers will not see them. Use
-  [`/coconpc list`](/docs/commands/list) to find them.
-</Callout>
-
-<Callout type="error" title="CRITICAL: Bedrock Players">
-  **Bedrock players cannot see these NPCs.** 
-  
-  Because they cannot see them, any actions or triggers bound to an NPC are permanently cancelled for Bedrock players.
-</Callout>
+1. **Zero Entity Lag (0 Ticks):** NPCs exist purely as client packets. They do not pathfind, collide, or slow down server MSPT.
+2. **Vanilla Blockbench Animations:** Play native `.bbmodel` or Bedrock `.json` animations smoothly with mathematical Slerp quaternion interpolation. **No resource packs required!**
+3. **Persistent Animations:** Animations automatically loop and resume across server restarts and world reloads.
+4. **Interactive 3D In-World Editor:** Pose limbs, bend elbows and knees, and reposition parts directly in-game using mouse scroll wheels.
+5. **Powerful Action Engine:** Bind clicks to console commands, player commands, sounds, actionbars, titles, permissions, money checks, and Velocity/BungeeCord proxy transfers.
+6. **Clean Architecture:** Every NPC is safely isolated into its own file (`plugins/CocoNPC/npcs/<id>.yml`). An accidental `/kill @e` will never delete your NPCs.
 
 ---
 
 ## Requirements
 
-| Requirement | Version |
-| :--- | :--- |
-| Server | PaperMC **1.21 through 26.2** |
-| Java | **21+** (Minecraft 26.2 itself needs 25) |
-| PacketEvents | **2.13.0+** (required, not optional) |
-| MineSkin API key | Required to generate new skins |
-| PlaceholderAPI | Optional — only for `[require_money]` |
+| Requirement | Supported Version | Details |
+| :--- | :--- | :--- |
+| **Server** | Paper / Purpur / Folia **1.21+** (up to 26.2+) | Required |
+| **Java** | **21+** | Required |
+| **PacketEvents** | **2.13.0+** | Required hard dependency |
+| **MineSkin API key** | Free key from [mineskin.org](https://mineskin.org/account) | Required to generate new skins |
+| **PlaceholderAPI** | Latest | Optional (for `%vault_eco_balance%`) |
 
-<Callout type="info">
-  One jar covers the whole range. It is compiled against the 1.21 API and against Java 21,
-  which every supported server can run. Minecraft switched to date-based versioning after
-  1.21.11, so `26.1` and `26.2` are **newer** than `1.21.x`, not older.
+<Callout type="error" title="Note for Bedrock Players (Geyser)">
+  Because Minecraft Display Entities are not rendered by Bedrock clients, Bedrock players cannot see or interact with these NPCs. CocoNPC automatically detects Bedrock players via Floodgate and prevents invisible ghost clicks.
 </Callout>
 
 ---
 
-## Start here
+## Quick Navigation
 
 <Cards>
-  <Card title="Getting Started" description="Install the plugin, set your MineSkin key, and spawn your first NPC." href="/docs/getting-started" />
-  <Card title="Worked Example" description="Build one complete NPC end to end, with conditions." href="/docs/example" />
-  <Card title="The 3D Editor" description="Pose limbs, bend joints and position NPCs with scroll controls." href="/docs/editor" />
-  <Card title="Action Engine" description="Bind clicks to messages, commands, economy checks and cooldowns." href="/docs/actions" />
-  <Card title="Command Reference" description="Every subcommand, argument and permission." href="/docs/commands" />
+  <Card title="Getting Started" description="Installation, MineSkin key setup, and spawning your first NPC." href="/docs/getting-started" />
+  <Card title="Blockbench Animations" description="How to create and play custom animations without resource packs." href="/docs/animations" />
+  <Card title="The 3D Editor" description="Bend joints, rotate limbs, and customize holograms with scroll controls." href="/docs/editor" />
+  <Card title="Action Engine" description="Set up messages, sounds, commands, cooldowns, and server portals." href="/docs/actions" />
+  <Card title="Worked Example" description="Step-by-step tutorial building a complete VIP NPC guard." href="/docs/example" />
+  <Card title="Command Reference" description="Complete list of all commands, arguments, and permissions." href="/docs/commands" />
 </Cards>
 
 ---
 
-## Support
+## Support & Community
 
-Questions, bug reports and feature requests go to the Discord:
+Need help, have a question, or want to share feedback?
 
 <Cards>
-  <Card title="Join the CocoNPC Discord" description="Get help, report bugs and follow updates." href="https://discord.gg/ydsUw5UJrB" />
+  <Card title="Join the CocoNPC Discord" description="Get fast community support, report bugs, and download sample animations." href="https://discord.gg/ydsUw5UJrB" />
 </Cards>

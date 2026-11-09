@@ -1,10 +1,9 @@
 ---
 title: /coconpc action
-description: Add, list, remove and clear the click actions bound to an NPC.
+description: Add, list, remove and clear click actions and conditions on an NPC.
 ---
 
-Manages an NPC's click action list. For what the tags mean and how chains behave, see the
-[Action Engine guide](/docs/actions).
+Manages an NPC's click action list. For detailed behavior and examples, see the [Action Engine guide](/docs/actions).
 
 ---
 
@@ -17,23 +16,21 @@ Manages an NPC's click action list. For what the tags mean and how chains behave
 | Subcommand | Syntax | Description |
 | :--- | :--- | :--- |
 | `add` | `action <id> add <type> <value>` | Append an action to the end of the list. |
-| `list` | `action <id> list` | Show the numbered list. |
-| `remove` | `action <id> remove <index>` | Delete one entry by its 1-based number. Aliases `del`, `delete`. |
-| `clear` | `action <id> clear` | Delete every action. |
+| `list` | `action <id> list` | View all configured actions with their index numbers. |
+| `remove` | `action <id> remove <index>` | Delete one entry by its 1-based number (aliases: `del`, `delete`). |
+| `clear` | `action <id> clear` | Delete every action on this NPC. |
 
 ---
 
-## Valid types
+## Supported Action Types
 
 Write the type with or without brackets — `message` and `[message]` both work.
 
-**Actions:** `message`, `broadcast`, `chat`, `console`, `player`, `title`, `subtitle`,
-`give_exp`, `take_exp`, `server`
-
-**Conditions:** `require_permission`, `require_money`, `cooldown`
+- **Actions:** `message`, `broadcast`, `chat`, `console`, `player`, `title`, `subtitle`, `actionbar`, `sound`, `teleport`, `potion`, `heal`, `feed`, `give_item`, `take_item`, `give_exp`, `take_exp`, `server`, `animate`
+- **Conditions:** `require_permission`, `require_money`, `cooldown`
 
 <Callout type="info">
-  `connect` is accepted as an alias for `server`, but the stored tag is `[server]`.
+  `connect` is accepted as an alias for `server`. `server` supports both **Velocity** and **BungeeCord** proxies.
 </Callout>
 
 ---
@@ -41,52 +38,38 @@ Write the type with or without brackets — `message` and `[message]` both work.
 ## Examples
 
 ```bash
-# A greeting that uses the clicking player's name
+# Greet the player
 /coconpc action 1 add message <yellow>Welcome to the city, <player>!
 
-# Pay the player from console
+# Play an animation on click
+/coconpc action 1 add animate 1 wave
+
+# Play a sound effect
+/coconpc action 1 add sound entity.player.levelup 1.0 1.0
+
+# Run a console reward command
 /coconpc action 1 add console eco give <player> 100
 
-# Rate-limit the NPC to one use per minute
-/coconpc action 1 add cooldown 1m
+# Enforce a 30-minute cooldown
+/coconpc action 1 add cooldown 30m
 
-# Send them to another backend server
+# Send player to a backend server
 /coconpc action 1 add server survival-2
 ```
 
-<Callout type="warn">
-  Use `<player>` or `%player_name%`. `{player}` is not a placeholder and prints literally.
-</Callout>
-
 ---
 
-## Reviewing and editing
+## Reviewing and Removing
 
 ```bash
+# List all actions
 /coconpc action 1 list
-```
 
-```text
---- Actions for NPC #1 ---
-#1: [cooldown] 1m
-#2: [message] <yellow>Welcome to the city, <player>!
-#3: [console] eco give <player> 100
-```
-
-Remove entry 2, then wipe the list entirely:
-
-```bash
+# Remove entry #2
 /coconpc action 1 remove 2
+
+# Clear all actions
 /coconpc action 1 clear
 ```
 
-Removing an entry renumbers everything after it, so run `list` again before your next
-`remove`.
-
----
-
-## Order matters
-
-Actions run top to bottom, and a failed **condition** stops the rest of the list. Put
-`cooldown`, `require_permission` and `require_money` above the rewards they guard, or the
-reward will already have been handed out by the time the check runs.
+Removing an entry re-indexes subsequent actions, so run `/coconpc action <id> list` again before removing another entry.

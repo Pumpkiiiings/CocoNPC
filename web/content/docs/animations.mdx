@@ -1,41 +1,104 @@
 ---
 title: Blockbench Animations
-description: Play 100% vanilla animations without requiring Resource Packs.
+description: Play smooth 100% vanilla animations without requiring Resource Packs or mods.
 ---
 
-CocoNPC natively supports playing **Blockbench `.bbmodel`** animations without requiring a resource pack!
+CocoNPC natively supports playing **Blockbench `.bbmodel`** and Bedrock `.json` animations on your NPCs.
 
-Since we use Vanilla Display Entities, CocoNPC takes standard **Player Limbs** and animates them mathematically using `Slerp` quaternions interpolation. 
-
----
-
-## How it works
-
-CocoNPC links your animation keyframes to the NPC's 6 body parts: `head`, `body`, `right_arm`, `left_arm`, `right_leg`, and `left_leg`. 
-
-This means that your `.bbmodel` MUST be a model composed of these 6 standard player limbs. Custom geometry (like a 20-bone dragon or a car) will **not** work because CocoNPC enforces mapping your standard `.png` skin to exactly 6 player limbs.
+No resource pack, no client mod, and no OptiFine required! CocoNPC calculates smooth mathematical quaternion interpolation (`Slerp`) between keyframes and sends packet updates to players within view.
 
 ---
 
-## 🛠️ Supported Models
+## Quick Start (3 Steps)
 
-* Any `.bbmodel` designed for standard player-limb bones (e.g., exported Bedrock player models).
-* The bone names in your Blockbench outliner **MUST** be named exactly:
-  * `head`
-  * `body`
-  * `right_arm`
-  * `left_arm`
-  * `right_leg`
-  * `left_leg`
-* Exported Bedrock Animation `.json` files are also supported if you prefer not to drop the entire `.bbmodel`.
+1. **Get an animation:** Create or export an animation in Blockbench using the standard 6 player limbs.
+2. **Drop the file:** Put your `.bbmodel` or `.json` file inside `plugins/CocoNPC/animations/`.
+3. **Load and play:**
+   ```bash
+   /coconpc reload
+   /coconpc animate 1 wave
+   ```
 
 ---
 
-## How to use
+## 🦴 Required Bone Names
 
-1. **Create or download** a player animation in Blockbench (ensure the bone names match the ones above).
-2. **Drop** your `.bbmodel` (or `.json`) file directly into `plugins/CocoNPC/animations/`.
-3. **Restart** the server or run `/coconpc reload`. The plugin will automatically parse and load all the animations inside your model.
-4. **Play** the animation in-game using the API or state configs!
+CocoNPC maps animation keyframes directly to standard Minecraft player limbs. For your animation to work, the bone (group) names in Blockbench **MUST** be named exactly as follows:
 
-> **Note:** The names of the animations will be exactly as you named them inside Blockbench (e.g. `idle`, `walk`, `wave`).
+| Bone Name | Body Part |
+| :--- | :--- |
+| `head` | Head |
+| `body` | Torso / Body |
+| `right_arm` | Right Arm |
+| `left_arm` | Left Arm |
+| `right_leg` | Right Leg |
+| `left_leg` | Left Leg |
+
+<Callout type="warn">
+  Custom geometry (such as extra wings, capes, or non-player models) will not animate because CocoNPC operates strictly on Minecraft player skins and their 6 anatomical parts.
+</Callout>
+
+---
+
+## In-Game Commands
+
+### Play an animation
+```bash
+/coconpc animate <id> <animation>
+```
+*Example:* `/coconpc animate 1 idle`
+
+The animation name matches the name defined inside your Blockbench animation tab (e.g. `idle`, `walk`, `wave`, `attack`). Names are **case-insensitive**.
+
+### Stop an animation
+```bash
+/coconpc animation_stop <id>
+```
+*Example:* `/coconpc animation_stop 1`
+
+Resets the NPC's active animation and returns it to its saved static pose.
+
+---
+
+## 💾 Server Restart Persistence
+
+You do **not** need to re-apply animations every time you restart your server or modality!
+
+When you run `/coconpc animate <id> <animation>`, CocoNPC automatically saves the animation name into `plugins/CocoNPC/npcs/<id>.yml`:
+
+```yaml
+# npcs/1.yml
+id: 1
+size: 1.0
+animation: wave
+# ...
+```
+
+Whenever your server starts, restarts, or loads the world, the NPC automatically resumes playing its animation in a continuous loop.
+
+---
+
+## ⚡ Triggering Animations with Actions
+
+You can also trigger animations dynamically when players interact with an NPC using the `[animate]` action tag:
+
+```bash
+# When clicked, NPC #1 plays the "wave" animation
+/coconpc action 1 add animate 1 wave
+
+# When clicked, NPC #1 triggers an animation on NPC #2
+/coconpc action 1 add animate 2 dance
+
+# Stop the animation on click
+/coconpc action 1 add animate 1 stop
+```
+
+See the [Action Engine guide](/docs/actions) for more details on click triggers.
+
+---
+
+## 💡 Tips & Best Practices
+
+- **Both `.bbmodel` and `.json` are supported:** You can drop the native Blockbench `.bbmodel` project file directly, or export it as a Bedrock Animation `.json`.
+- **Supported Keyframes:** Both **Rotation** and **Position** keyframes are supported.
+- **Reloading:** Whenever you add or edit an animation file in `plugins/CocoNPC/animations/`, just run `/coconpc reload`. The console will display how many animations were registered.

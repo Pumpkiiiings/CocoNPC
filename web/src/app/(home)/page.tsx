@@ -54,7 +54,7 @@ export default function HomePage() {
           >
             <div className="static-glow" />
             <span style={{ position: "relative", zIndex: 1, fontSize: "0.88rem", fontWeight: "700", letterSpacing: "1px", color: "#f3f4f6" }}>
-              ✨ COCONPC V1.0.0 • NEXT-GEN DISPLAY ENTITIES
+              ✨ COCONPC V1.2.1 • NEXT-GEN DISPLAY ENTITIES
             </span>
           </motion.div>
 
@@ -141,9 +141,10 @@ export default function HomePage() {
           <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth: "850px", margin: "0 auto" }}>
             {[
               { icon: "🗿", title: "Zero Lag & No Heavy Entities", desc: "Exclusively powered by Minecraft Display Entities with zero artificial intelligence computation, guaranteeing 0 TPS impact and flawless server performance." },
+              { icon: "🎬", title: "Vanilla Blockbench Animations", desc: "Play native .bbmodel and Bedrock .json animations with smooth quaternion interpolation. No resource packs or client mods required, and persists across restarts." },
               { icon: "✨", title: "Real-Time Hologram Editor", desc: "Customize text shadowing, background color opacity, and dynamic billboard orientations on the fly via responsive in-game GUI menus without abrupt closures." },
               { icon: "🌗", title: "Adaptive Day/Night Shading", desc: "Zero forced artificial brightness. Your NPCs dynamically adapt to surrounding torchlight and solar cycles while projecting authentic ground shadows." },
-              { icon: "⚡", title: "Persistent Action Chains", desc: "Assign clickable multi-command executions (chat, console) and interactive dialogues that reliably survive server reboots without any data loss." },
+              { icon: "⚡", title: "Persistent Action Chains", desc: "Assign clickable multi-command executions (chat, console, server transfers, sounds, animations) and interactive dialogues that reliably survive server reboots without any data loss." },
               { icon: "🎨", title: "100% Customizable Menus & Fillers", desc: "Clean item lore without ghost italics, fully editable GUI filler slots, and an intuitive modern YAML architecture." }
             ].map((item, idx) => (
               <div key={idx} style={{ 
@@ -247,6 +248,32 @@ export default function HomePage() {
               }}>
                 <strong style={{ fontSize: "1.08rem", letterSpacing: "0.5px", color: copiedCmd === "edit" ? "#fbbf24" : "white", fontFamily: "monospace" }}>
                   {copiedCmd === "edit" ? "✓ COPIED!" : "/coconpc edit 1"}
+                </strong>
+              </div>
+            </div>
+
+            {/* Animate Command Card */}
+            <div 
+              className="glass-card" 
+              onClick={() => copyText("animate", "/coconpc animate 1 wave")}
+              style={{ padding: "28px 34px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "20px", cursor: "pointer", flexWrap: "wrap" }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+                <div style={{ width: "64px", height: "64px", background: "rgba(255, 255, 255, 0.07)", borderRadius: "16px", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <span style={{ fontSize: "2.2rem" }}>🎬</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <h3 style={{ fontSize: "1.45rem", fontWeight: "bold", margin: 0, color: "white" }}>Play Blockbench Animation</h3>
+                  <span style={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.95rem" }}>Play custom Blockbench animations in a persistent, smooth loop</span>
+                </div>
+              </div>
+              <div style={{ 
+                background: copiedCmd === "animate" ? "rgba(245, 158, 11, 0.18)" : "rgba(255, 255, 255, 0.05)",
+                border: copiedCmd === "animate" ? "1px solid rgba(245, 158, 11, 0.65)" : "1px solid rgba(255, 255, 255, 0.12)",
+                padding: "14px 28px", borderRadius: "14px", transition: "all 0.3s ease" 
+              }}>
+                <strong style={{ fontSize: "1.08rem", letterSpacing: "0.5px", color: copiedCmd === "animate" ? "#fbbf24" : "white", fontFamily: "monospace" }}>
+                  {copiedCmd === "animate" ? "✓ COPIED!" : "/coconpc animate 1 wave"}
                 </strong>
               </div>
             </div>

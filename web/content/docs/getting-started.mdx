@@ -1,123 +1,76 @@
 ---
 title: Getting Started
-description: Install CocoNPC, configure the MineSkin key, and spawn your first NPC.
+description: Install CocoNPC, configure your MineSkin key, and spawn your first NPC in minutes.
 ---
 
-## 1. Install the dependencies
+## 1. Requirements & Installation
 
-CocoNPC will not load without **PacketEvents**. It is a hard dependency, not a soft one:
-every part of an NPC is drawn with packets.
+CocoNPC uses packet-based Display Entities for ultra-high performance with zero server entity tick lag.
 
-1. Download **PacketEvents 2.13.0** or newer and drop it into `plugins/`.
-2. Drop `CocoNPC-1.0.0.jar` into `plugins/`.
-3. Start the server on **Paper 1.21 or newer**, up to and including **26.2**.
+### Requirements:
+- **Paper / Purpur / Folia:** 1.21 or newer (up to 26.2+)
+- **Java:** 21 or newer
+- **PacketEvents:** 2.13.0+ (Required dependency)
+- **PlaceholderAPI:** (Optional, needed for `%vault_eco_balance%` money conditions)
 
-The same jar works across the whole range — there is no separate build per version.
+### Installation:
+1. Download [PacketEvents](https://ci.codemc.io/job/retrooper/job/packetevents/) and place it into your `plugins/` folder.
+2. Download `CocoNPC-1.2.1.jar` and place it into your `plugins/` folder.
+3. Start or restart your server.
+
+---
+
+## 2. Set Your MineSkin API Key
+
+CocoNPC splits player skins into individual limb textures and uploads them using MineSkin. A free MineSkin API key is required to generate new skins.
+
+1. Get a free API key at [mineskin.org/account](https://mineskin.org/account).
+2. Set your key directly in-game:
+   ```bash
+   /coconpc setkey your_api_key_here
+   ```
+   *(Or add it to `plugins/CocoNPC/config.yml` under `mineskin.api-key` and run `/coconpc reload`)*
 
 <Callout type="info">
-  Minecraft moved to date-based versioning after 1.21.11, so `26.1` and `26.2` are newer
-  than `1.21.x`, not older. Java requirements follow the server: 1.21.x runs on Java 21,
-  26.x needs Java 25. The plugin itself is built for Java 21, so it loads on both.
+  Already cached skins in `skins.yml` do not require an active API key to spawn. The key is only needed when generating a brand-new skin for the first time.
 </Callout>
-
-On first start the plugin creates `plugins/CocoNPC/` containing `config.yml`,
-`messages.yml`, `menus/`, and an empty `skins/` folder.
 
 ---
 
-## 2. Set your MineSkin API key
+## 3. Spawn Your First NPC
 
-To render a skin across eleven separate heads, CocoNPC slices the skin into per-limb
-textures and uploads each one to [MineSkin](https://mineskin.org). The MineSkin v3 API
-**will not do this anonymously**, so a key is required.
-
-Without a key you will see this on startup:
-
-```text
-[CocoNPC] No MineSkin API key set. Skin generation will fail — get a key at
-https://mineskin.org/account and apply it with /coconpc setkey <key>.
-```
-
-Get a free key at [mineskin.org/account](https://mineskin.org/account), then apply it
-either way:
-
-```bash
-# In-game, applies immediately
-/coconpc setkey your_api_key_here
-```
-
-```yaml
-# Or in plugins/CocoNPC/config.yml, then run /coconpc reload
-mineskin:
-  api-key: "your_api_key_here"
-```
-
-<Callout type="warn">
-  `/coconpc setkey` is echoed into your server log like any other command. On a server
-  where other people can read the console, edit `config.yml` instead and reload.
-</Callout>
-
-Already-cached skins in `skins.yml` keep working without a key. Only *new* skins need one.
-
----
-
-## 3. Spawn your first NPC
+Stand at your desired location facing the direction you want the NPC to look towards, then run:
 
 ```bash
 /coconpc create 1 Notch
 ```
 
-The id comes **first** and is required. The skin argument accepts a premium player name, a
-direct texture URL, or the filename of a `.png` you dropped into `plugins/CocoNPC/skins/`.
+- `1`: The unique numeric ID for your NPC.
+- `Notch`: The skin (supports premium player usernames, direct texture URLs, or local `.png` filenames in `plugins/CocoNPC/skins/`).
 
-The first spawn of any given skin is slow — eleven textures have to be cropped and
-uploaded. Progress is reported in chat. Once cached in `skins.yml`, the same skin spawns
-instantly forever after.
-
-Add a size multiplier as a third argument:
-
+You can also specify a custom scale multiplier as an optional 3rd parameter:
 ```bash
-/coconpc create 2 Notch 2.5   # two-and-a-half times scale
+/coconpc create 2 Notch 1.5   # 1.5x scale
 ```
 
 ---
 
-## 4. Customise it
+## 4. Customize Your NPC
 
-| Goal | How |
+| What you want to do | Command / Shortcut |
 | :--- | :--- |
-| Open the editor GUI | `/coconpc edit 1`, or shift + right-click the NPC |
-| Pose limbs by hand | [3D editor](/docs/editor) — left-click a part in the GUI |
-| Apply a preset pose | `/coconpc pose 1 sit` |
-| Give it an item | Hold the item, then `/coconpc item 1 right` |
-| Make it do something | [Action engine](/docs/actions) |
-| Change the hologram | Shift-click the hologram button in the editor GUI |
+| **Open the 3D In-World Editor** | `/coconpc edit 1` *(or Shift + Right-Click the NPC)* |
+| **Play a Blockbench Animation** | `/coconpc animate 1 <name>` (see [Animations Guide](/docs/animations)) |
+| **Apply a Preset Pose** | `/coconpc pose 1 <stand\|sit\|lay\|wave\|salute\|crossed_arms>` |
+| **Equip an Item in Hand** | Hold the item and run `/coconpc item 1 right` *(or left)* |
+| **Configure Click Actions** | `/coconpc action 1 add ...` (see [Action Engine](/docs/actions)) |
+| **Change Hologram Text** | Shift + Right-Click the Hologram button in `/coconpc edit 1` |
 
 ---
 
-## Local skin files
+## Next Steps
 
-Drop any `.png` skin into `plugins/CocoNPC/skins/` and it becomes available by filename,
-with tab completion:
-
-```bash
-/coconpc create 3 my_custom_skin
-```
-
-To upload every new local skin to the texture cache ahead of time — so the first player
-interaction is not the one that waits — run:
-
-```bash
-/coconpc preload
-```
-
-Slim ("Alex") three-pixel-arm skins are detected and converted to the classic four-pixel
-layout automatically.
-
----
-
-## Need help?
-
-Join the [CocoNPC Discord](https://discord.gg/ydsUw5UJrB) for support, bug reports and
-release announcements. Check [Troubleshooting](/docs/troubleshooting) first — it covers the
-common install problems.
+- [Blockbench Animations](/docs/animations) — Add custom `.bbmodel` animations to your NPCs without resource packs.
+- [Action Engine](/docs/actions) — Bind messages, sounds, commands, cooldowns, and server transfers to clicks.
+- [The 3D Editor](/docs/editor) — Millimetric limb rotations, joint bending, and positioning.
+- [Command Reference](/docs/commands) — Comprehensive list of all available subcommands.

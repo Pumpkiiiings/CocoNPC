@@ -4,6 +4,7 @@
     "index",
     "create",
     "edit",
+    "animate",
     "action",
     "pose",
     "resize",

@@ -1,155 +1,75 @@
 ---
 title: Troubleshooting
-description: Common failures, what causes them, and how to fix them.
+description: Solutions for common issues, error messages, and frequently asked questions.
 ---
 
-## The plugin will not load
+## Plugin Loading & Startup
 
-**`Missing dependency packetevents`** — PacketEvents is a hard dependency. Install 2.13.0
-or newer into `plugins/`.
+### "Missing dependency: PacketEvents"
+**Cause:** PacketEvents is a hard requirement for packet-based entity rendering.  
+**Fix:** Download and install [PacketEvents 2.13.0+](https://ci.codemc.io/job/retrooper/job/packetevents/) into your server's `plugins/` folder and restart.
 
-**`Unsupported class file major version` / server will not start** — this is the *server's*
-Java requirement, not the plugin's. 1.21.x needs Java 21, 26.x needs Java 25. The plugin
-itself is built for Java 21 and loads on either. Check with `java -version`.
-
-**Server is older than 1.21** — not supported. CocoNPC is built against the 1.21 API and
-relies on Display entities and the Folia-style schedulers introduced around then.
+### "Unsupported class file major version"
+**Cause:** Mismatched server Java version. Minecraft 1.21.x requires Java 21, and 26.x requires Java 25. CocoNPC is compiled with Java 21 compatibility.  
+**Fix:** Update your server runtime to Java 21 or newer (`java -version`).
 
 ---
 
-## Skins
+## Animations
 
-### "Skin generation failed" on create
+### Animation does not play or limbs don't move
+**Check the following:**
+1. **Bone Names:** Make sure your Blockbench model groups are named exactly:  
+   `head`, `body`, `right_arm`, `left_arm`, `right_leg`, `left_leg`.  
+   Any other names or custom bone structures will not be mapped to player limbs.
+2. **File Location:** Put your `.bbmodel` or `.json` file inside `plugins/CocoNPC/animations/`.
+3. **Reload:** Run `/coconpc reload` to register newly added animation files. Check your console log to verify how many animations were loaded.
+4. **Animation Name:** Animation names in `/coconpc animate <id> <name>` are case-insensitive, but must match the animation title inside Blockbench (e.g. `idle`, `walk`, `wave`).
 
-Check the console for the underlying reason. The most common one:
+### Animations stopping after server restart
+**Fix:** Update to CocoNPC **v1.2.1** or newer. Starting in v1.2, running `/coconpc animate <id> <name>` automatically saves the animation in `plugins/CocoNPC/npcs/<id>.yml` and loops continuously across restarts and world reloads.
 
-```text
-[CocoNPC] No MineSkin API key set. Skin generation will fail
-```
+---
 
-Set a key with [`/coconpc setkey`](/docs/commands/setkey). Skins already cached in
-`skins.yml` keep working without one — only new skins fail.
+## Skins & Appearance
 
-### The skin's arms look wrong
-
-Slim ("Alex") skins are converted to the classic layout automatically, based on sampling
-pixels that only a slim skin leaves transparent. A skin that is neither cleanly slim nor
-cleanly classic can confuse that check. Try re-exporting it as a standard 64×64 classic
-skin.
+### "Skin generation failed" / "No MineSkin API key set"
+**Cause:** Generating new player limb textures requires contacting the MineSkin API.  
+**Fix:** Get a free API key at [mineskin.org/account](https://mineskin.org/account) and apply it using `/coconpc setkey <key>`. Previously cached skins in `skins.yml` continue to work without a key.
 
 ### Spawning a new skin is slow
+**Explanation:** This is normal for the very first time a skin is spawned. CocoNPC slices the skin into 11 individual limb textures and uploads them sequentially to avoid rate limits. Once uploaded, the textures are cached in `skins.yml` and all future spawns of that skin will be instant.
 
-Expected. Eleven textures have to be cropped and uploaded, and MineSkin rate-limits per
-key. Uploads are deliberately sequential — firing them in parallel just earns rate-limit
-errors. Run [`/coconpc preload`](/docs/commands/reload) ahead of time so the wait happens
-when you choose.
-
-### "The name entered does not belong to an account with a skin"
-
-The name was treated as a premium player name and Mojang returned nothing. Check the
-spelling, or pass a texture URL or local `.png` filename instead.
+### Arms or body look distorted
+**Explanation:** CocoNPC automatically detects and converts 3-pixel slim ("Alex") skins to classic 4-pixel layouts. Non-standard skins with transparent body regions or incorrect dimensions can cause artifacts. Use standard 64x64 Minecraft skins.
 
 ---
 
-## NPCs
+## Actions & Interactions
 
-### An NPC is invisible
+### `[server]` does not connect on Velocity
+**Fix:** In v1.2+, CocoNPC natively supports Velocity proxies via the `velocity:player_info` plugin messaging channel, as well as BungeeCord proxies. Ensure your proxy has player messaging enabled and server names match your proxy's `velocity.toml` configuration.
 
-- Are you within the view distance? Check with
-  [`/coconpc viewdistance`](/docs/commands/viewdistance).
-- Is the part hidden? Right-clicking a part in the editor toggles its visibility. Open the
-  editor and right-click it again, or run `/coconpc pose <id> stand`.
-- Is it in another world? `/coconpc list` shows coordinates; `/coconpc tp <id>` takes you
-  there.
-
-### `/kill @e` did not remove it, and selectors cannot find it
-
-Working as designed. NPCs are packet-only and are not world entities, so no command
-selector can see them. Use [`/coconpc delete <id>`](/docs/commands/delete).
-
-This also means NPCs cannot be destroyed by a stray kill command, a chunk wipe, or a
-rollback.
-
-### Bedrock players cannot see or use NPCs
-
-Expected, and not fixable from this plugin's side. NPCs are Display entities, which Bedrock
-clients connecting through Geyser do not render.
-
-Because they cannot see them, their clicks are ignored by default rather than handing out
-rewards for hitting nothing. They get a message explaining why. Both behaviours are
-configurable under `bedrock:` in [Configuration](/docs/configuration), and detection
-requires Floodgate to be installed.
-
-### Leftover NPC parts from an old version
-
-Versions before the packet engine spawned real Display entities. Those are found and
-removed automatically as chunks load, so just visit the area once.
-
----
-
-## Actions
+### `[require_money]` always blocks actions
+**Cause:** `[require_money]` checks player balances using PlaceholderAPI's `%vault_eco_balance%`.  
+**Fix:** Ensure you have both **PlaceholderAPI** and the **Vault** expansion installed (`/papi ecloud download Vault` followed by `/papi reload`). If no economy plugin is available, set `require-money-strict: false` in `config.yml`.
 
 ### An action prints `{player}` literally
-
-`{player}` is not a placeholder. Use `<player>` or `%player_name%`.
-
-### Nothing happens past a certain point in the list
-
-A **condition** failed and stopped the chain. Check `[cooldown]`, `[require_permission]`
-and `[require_money]` entries with `/coconpc action <id> list`.
-
-### `[require_money]` always blocks
-
-It reads `%vault_eco_balance%`, so it needs PlaceholderAPI **and** the Vault expansion.
-Without them it fails closed by design; the console says so. See
-`actions.require-money-strict` in [Configuration](/docs/configuration).
-
-### "Unknown action tag"
-
-The tag has no processor. Valid names are listed in
-[`/coconpc action`](/docs/commands/action). Note the network transfer tag is `[server]` —
-`connect` is accepted when adding, but stored as `[server]`.
-
-### A console action ran with mangled arguments
-
-Whitespace is stripped out of substituted player names, and the characters in
-`actions.console-blocked-characters` are removed from expanded placeholders. That is a
-deliberate guard against a crafted name appending arguments to your command. Anything
-stripped is logged.
+**Fix:** Use `<player>` or `%player_name%`. `{player}` with curly braces is not an evaluation token.
 
 ---
 
-### NPCs are invisible on a very new Minecraft version
+## Bedrock Players (Geyser)
 
-NPCs are drawn by writing entity metadata fields by index. Those indices have been stable
-from 1.21 through 26.2 and are verified against both ends of that range, but Mojang can
-shift them in a future update — a body part would then render with the wrong field, or not
-at all.
-
-If that happens after a Minecraft update, it needs a plugin update, not a config change.
-Check that PacketEvents also supports the new version.
-
-## Performance
-
-### Lag with many NPCs
-
-NPCs cost no entity ticks, but visibility is still recomputed as players move. If a lot of
-NPCs sit in one busy area, lower `npc.view-distance`.
-
-### Commands do not work from console
-
-By design — they need a player position and a player inventory. `execute as <player> run`
-does not help, because Paper keeps the console as the sender.
+### Bedrock players cannot see or click NPCs
+**Explanation:** CocoNPC creates NPCs using Minecraft Display Entities. Bedrock Edition clients connecting through Geyser currently do not render Display Entities. For this reason, interactions by Bedrock players are blocked by default to prevent invisible click exploits. This requires **Floodgate** for Bedrock player detection.
 
 ---
 
-## Still stuck?
+## Still Need Help?
 
-Ask on the [CocoNPC Discord](https://discord.gg/ydsUw5UJrB).
+Join our official community support Discord:
 
-Bring the relevant lines from `logs/latest.log`, your server version, and your PacketEvents
-version — those three answer most questions immediately.
-
-<Callout type="warn">
-  Never paste `config.yml` as-is: it holds your MineSkin API key. Blank that line first.
-</Callout>
+<Cards>
+  <Card title="Join the CocoNPC Discord" description="Ask questions, report issues, and download sample animations." href="https://discord.gg/ydsUw5UJrB" />
+</Cards>
