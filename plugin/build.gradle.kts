@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.pumpkings.coconpc"
-version = "1.2.2"
+version = "1.2.3"
 
 repositories {
     mavenCentral()
@@ -60,6 +60,10 @@ tasks {
         testLogging {
             events("passed", "skipped", "failed")
         }
+    }
+
+    jar {
+        archiveClassifier.set("plain")
     }
 
     shadowJar {

@@ -1,0 +1,60 @@
+# ─────────────────────────────────────────────────────────────
+#  CocoNPC · custom .bbmodel mobs
+# ─────────────────────────────────────────────────────────────
+# Drop your Blockbench models in plugins/CocoNPC/mobs and run:
+#   /coconpc mob reload
+#
+# Every .bbmodel found there gets its own section below the first time
+# it is loaded, with documented defaults. You can then edit it and reload.
+#
+# Example section:
+#
+# mobs:
+#   my_mob:
+#     model: my_mob.bbmodel
+#     driver: ARMOR_STAND        # Any living EntityType: ZOMBIE, SKELETON...
+#     texture-mode: skins        # skins (MineSkin player heads) or blocks
+#     scale: 1.0
+#     yaw-offset: 180            # 180 = model faces the same way as the driver
+#     view-range: 2.0
+#     interpolation: 1
+#     interpolation-delay: 0
+#     teleport-duration: 1
+#     reanchor-distance: 4.0
+#     hitbox:
+#       enabled: true
+#       width: 0.9
+#       height: 1.8
+#     actions:                   # NPC-style actions run on right-click
+#       - "[message] Hello!"
+#       - "[mob_animate] greet loop"
+#     cooldown: 3.0              # per-player interaction cooldown in seconds
+#     animation: greet           # optional one-shot played when it spawns
+#     animations:
+#       idle: idle
+#       walk: walk
+#       attack: attack
+#       hurt: hurt
+#       death: death
+#       idle-threshold: 0.02
+#       walk-reference-speed: 0.2
+#       walk-playback-min: 0.35
+#       walk-playback-max: 2.5
+#       hurt-flash-ticks: 6
+#       additive-rotation: false
+#       attack-on-aggro: true
+#
+# Optional behaviour overrides (their defaults follow the driver):
+#     static: true               # force a completely static driver
+#     ai: true
+#     gravity: true
+#     collidable: true
+#     invulnerable: false
+#     marker: false
+#     max-health: 20
+#
+# With driver: ARMOR_STAND the mob is an invisible marker with an
+# Interaction hitbox (static by default). Any other living driver enables
+# AI, gravity and collisions by default, so it walks around and animates.
+
+mobs: {}

@@ -3,7 +3,7 @@ version: ${version}
 main: com.pumpkings.coconpc.CocoNPC
 description: Advanced NPC management plugin for modern Paper servers.
 api-version: '1.21'
-author: Pumpkings
+author: Pumpkings, Dianelito
 dependencies:
   server:
     packetevents:
@@ -35,6 +35,8 @@ permissions:
       CocoNPC.viewdistance: true
       CocoNPC.reload: true
       CocoNPC.animate: true
+      CocoNPC.mob: true
+      CocoNPC.mob.edit: true
   CocoNPC.spawn:
     description: Spawn new NPCs.
     default: op
@@ -79,4 +81,10 @@ permissions:
     default: op
   CocoNPC.animate:
     description: Play and stop NPC animations.
+    default: op
+  CocoNPC.mob:
+    description: Manage custom .bbmodel mobs.
+    default: op
+  CocoNPC.mob.edit:
+    description: Open the custom mob editor, by command or by shift-clicking a mob.
     default: op

@@ -8,10 +8,19 @@ public class BlockbenchModel {
     public Meta meta;
     public String name;
     public List<OutlinerNode> outliner;
+    public List<Group> groups;
     public List<Animation> animations;
 
     public static class Meta {
         public String format_version;
+    }
+
+    /** Blockbench 5.0 stores bone names/origins here instead of the outliner. */
+    public static class Group {
+        public String name;
+        public String uuid;
+        public float[] origin;
+        public float[] rotation;
     }
 
     public static class OutlinerNode {

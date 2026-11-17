@@ -2,7 +2,9 @@ package com.pumpkings.coconpc.listener;
 
 import com.pumpkings.coconpc.CocoNPC;
 import com.pumpkings.coconpc.core.config.Message;
+import com.pumpkings.coconpc.core.mob.MobActionUtil;
 import com.pumpkings.coconpc.core.npc.NpcEntity;
+import com.pumpkings.coconpc.menu.MobEditorMenu;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -164,6 +166,43 @@ public class NpcInteractListener implements Listener {
     @EventHandler
     public void onChat(AsyncChatEvent event) {
         Player player = event.getPlayer();
+
+        if (this.plugin.getSelectionManager().hasPendingMobAction(player)) {
+            event.setCancelled(true);
+            String message = PlainTextComponentSerializer.plainText().serialize(event.message());
+            com.pumpkings.coconpc.core.mob.CustomMob mob =
+                    this.plugin.getSelectionManager().consumeMobAction(player);
+            if (mob == null) return;
+
+            org.bukkit.Bukkit.getScheduler().runTask(plugin, () -> {
+                if (message.equalsIgnoreCase("cancel")) {
+                    new MobEditorMenu(plugin, mob).open(player);
+                    return;
+                }
+
+                String action = MobActionUtil.normalize(message);
+                if (!MobActionUtil.isValid(plugin, action)) {
+                    Message.MOB_ACTION_INVALID.send(plugin, player, "{action}", message);
+                    new MobEditorMenu(plugin, mob).open(player);
+                    return;
+                }
+
+                java.util.List<String> actions = new java.util.ArrayList<>(
+                        mob.getDefinition().getActions());
+                actions.add(action);
+                String id = mob.getDefinition().getId();
+
+                if (plugin.getMobRegistry().saveActions(id, actions)) {
+                    Message.MOB_ACTION_ADDED.send(plugin, player,
+                            "{id}", id,
+                            "{index}", String.valueOf(actions.size()));
+                } else {
+                    Message.MOB_SAVE_FAILED.send(plugin, player, "{id}", id);
+                }
+                new MobEditorMenu(plugin, mob).open(player);
+            });
+            return;
+        }
 
         if (this.plugin.getSelectionManager().hasPendingSetKey(player)) {
             event.setCancelled(true);

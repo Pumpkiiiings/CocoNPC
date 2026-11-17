@@ -104,6 +104,36 @@ public class MineskinService {
       uploadExecutor.shutdownNow();
    }
 
+   /**
+    * Uploads a single 64x64 image and returns the resulting skin texture URL.
+    * Used by the custom-mob texture pipeline, where every cube needs its own
+    * skin. The shared single-thread executor keeps MineSkin requests ordered.
+    */
+   public CompletableFuture<String> uploadSkinImage(String label, BufferedImage image) {
+      CompletableFuture<String> result = new CompletableFuture<>();
+
+      if (!hasApiKey()) {
+         result.completeExceptionally(new IllegalStateException(
+                 "No MineSkin API key configured. Set one with /coconpc setkey <key>."));
+         return result;
+      }
+      if (image == null) {
+         result.completeExceptionally(new IllegalArgumentException("Missing skin image"));
+         return result;
+      }
+
+      String safeLabel = label == null || label.isBlank() ? "mob-cube" : label;
+      CompletableFuture.runAsync(() -> {
+         try {
+            result.complete(uploadOne(safeLabel, image));
+         } catch (Exception exception) {
+            result.completeExceptionally(exception);
+         }
+      }, uploadExecutor);
+
+      return result;
+   }
+
    private String uploadOne(String partName, BufferedImage image) throws Exception {
       Exception lastFailure = null;
 

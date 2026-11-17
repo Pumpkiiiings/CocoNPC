@@ -47,7 +47,15 @@ public class NpcRegistry {
         }
         return null;
     }
+    public void reloadAllNpcs() {
+        plugin.getConfigManager().getRepository().invalidateCache();
 
+        for (NpcEntity npc : npcs.values()) {
+            plugin.getConfigManager().getRepository().loadParts(npc);
+            npc.refreshTransforms();
+            npc.sendMetadataUpdateToAllViewers();
+        }
+    }
     public void spawn(Location location, Player player, String text, float size, String customId) {
         Message.SPAWNING.send(plugin, player);
         long start = System.currentTimeMillis();

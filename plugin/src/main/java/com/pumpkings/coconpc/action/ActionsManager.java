@@ -29,6 +29,14 @@ public class ActionsManager {
         processors.put(processor.tag().toLowerCase(), processor);
     }
 
+    /**
+     * Registers an extra tag that reuses an existing processor implementation.
+     */
+    public void registerAlias(String tag, ActionProcessor processor) {
+        if (tag == null || processor == null) return;
+        processors.put(tag.toLowerCase(), processor);
+    }
+
     public java.util.Set<String> getRegisteredTags() {
         return java.util.Collections.unmodifiableSet(processors.keySet());
     }
@@ -43,7 +51,9 @@ public class ActionsManager {
 
     private void registerDefaults() {
         register(new MessageProcessor(plugin));
-        register(new ConsoleProcessor(plugin));
+        ConsoleProcessor console = new ConsoleProcessor(plugin);
+        register(console);
+        registerAlias("[command]", console);
         register(new PlayerCommandProcessor(plugin));
         register(new ChatProcessor(plugin));
         register(new BroadcastProcessor(plugin));
@@ -59,6 +69,7 @@ public class ActionsManager {
         register(new HealProcessor());
         register(new FeedProcessor());
         register(new AnimateProcessor(plugin));
+        register(new MobAnimateProcessor(plugin));
     }
 
     public void runActions(final Player player, final List<String> actions, final String npcId) {

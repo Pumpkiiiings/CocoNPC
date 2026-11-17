@@ -31,11 +31,11 @@ public class NpcEntity {
     private com.pumpkings.coconpc.core.packet.entity.VirtualTextDisplay virtualHologram = null;
     private NpcSkin skin;
     private final String defaultSkin = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNTI2NjY0YjEzYzcxN2Y1MGEwY2ZlODhlYzBkOGRiZmE5MWFlY2FhYjRjYjhiNDU5ZTRmM2UzMmVmYzhmNmNhYSJ9fX0=";
-    private static final float HEAD_Y = 1.886f;
+    private static final float HEAD_Y = 1.885f;
     private static final float TORSO_UPPER_Y = 1.386f;
     private static final float TORSO_LOWER_Y_OFFSET = -0.5f;
     private static final float ARM_Y = 1.386f;
-    private static final float ARM_LOWER_Y_OFFSET = -0.5f;
+    private static final float ARM_LOWER_Y_OFFSET = -0.40f;
     private static final float ARM_X_OFFSET = 0.375f;
     private static final float LEG_Y = 0.636f;
     private static final float LEG_LOWER_Y_OFFSET = -0.5f;
@@ -69,7 +69,7 @@ public class NpcEntity {
         parts.put("leftLegLower", new ItemPart(getDefaultHead()));
         parts.put("right_item", new ItemPart(new ItemStack(org.bukkit.Material.AIR), ItemDisplay.ItemDisplayTransform.THIRDPERSON_RIGHTHAND));
         parts.put("left_item", new ItemPart(new ItemStack(org.bukkit.Material.AIR), ItemDisplay.ItemDisplayTransform.THIRDPERSON_LEFTHAND));
-        
+
         hitbox.setSize(0.8F * size, 1.8F * size);
     }
 
@@ -357,7 +357,7 @@ public class NpcEntity {
         }
     }
 
-    private void refreshTransforms() {
+    public void refreshTransforms() {
         updateTransforms();
         parts.values().forEach(part -> part.updateTransform(location));
     }
@@ -683,13 +683,13 @@ public class NpcEntity {
 
     public void applyAnimation(java.util.Map<String, org.joml.Vector3f> posOffsets, java.util.Map<String, org.joml.Quaternionf> rotOffsets) {
         applyAnimToPart("head", posOffsets.get("head"), rotOffsets.get("head"));
-        
+
         org.joml.Vector3f torsoP = syncUpperAndLower("torsoUpper", "torsoLower", posOffsets.get("body"), rotOffsets.get("body"), TORSO_LOWER_Y_OFFSET);
         org.joml.Vector3f rightArmP = syncUpperAndLower("rightArmUpper", "rightArmLower", posOffsets.get("right_arm"), rotOffsets.get("right_arm"), ARM_LOWER_Y_OFFSET);
         org.joml.Vector3f leftArmP = syncUpperAndLower("leftArmUpper", "leftArmLower", posOffsets.get("left_arm"), rotOffsets.get("left_arm"), ARM_LOWER_Y_OFFSET);
         syncUpperAndLower("rightLegUpper", "rightLegLower", posOffsets.get("right_leg"), rotOffsets.get("right_leg"), LEG_LOWER_Y_OFFSET);
         syncUpperAndLower("leftLegUpper", "leftLegLower", posOffsets.get("left_leg"), rotOffsets.get("left_leg"), LEG_LOWER_Y_OFFSET);
-        
+
         syncHandItem("rightArmLower", "right_item", rightArmP, rotOffsets.get("right_arm"), -0.35f);
         syncHandItem("leftArmLower", "left_item", leftArmP, rotOffsets.get("left_arm"), -0.35f);
     }
@@ -707,22 +707,22 @@ public class NpcEntity {
     private org.joml.Vector3f syncUpperAndLower(String upperName, String lowerName, org.joml.Vector3f pos, org.joml.Quaternionf rot, float yOffset) {
         ItemPart upper = parts.get(upperName);
         ItemPart lower = parts.get(lowerName);
-        
+
         org.joml.Vector3f p = pos != null ? pos : new org.joml.Vector3f();
         org.joml.Quaternionf r = rot != null ? rot : new org.joml.Quaternionf();
-        
+
         if (upper != null) {
             upper.setAnimOffset(p, r);
             upper.sendMetadataUpdateToAll();
         }
-        
+
         if (upper == null || lower == null) return p;
-        
+
         org.joml.Vector3f offset = new org.joml.Vector3f(0, yOffset * size, 0);
         org.joml.Vector3f baseOffset = new org.joml.Vector3f(offset).rotate(upper.getLeftRotation());
         org.joml.Quaternionf totalRot = new org.joml.Quaternionf(upper.getLeftRotation()).mul(r);
         org.joml.Vector3f animOffset = new org.joml.Vector3f(offset).rotate(totalRot);
-        
+
         org.joml.Vector3f diff = animOffset.sub(baseOffset);
         org.joml.Vector3f lowerP = new org.joml.Vector3f(p).add(diff);
         lower.setAnimOffset(lowerP, r);
@@ -734,14 +734,14 @@ public class NpcEntity {
         ItemPart lower = parts.get(lowerName);
         ItemPart item = parts.get(itemName);
         if (lower == null || item == null) return;
-        
+
         org.joml.Quaternionf r = rot != null ? rot : new org.joml.Quaternionf();
-        
+
         org.joml.Vector3f offset = new org.joml.Vector3f(0, yOffset * size, 0);
         org.joml.Vector3f baseOffset = new org.joml.Vector3f(offset).rotate(lower.getLeftRotation());
         org.joml.Quaternionf totalRot = new org.joml.Quaternionf(lower.getLeftRotation()).mul(r);
         org.joml.Vector3f animOffset = new org.joml.Vector3f(offset).rotate(totalRot);
-        
+
         org.joml.Vector3f diff = animOffset.sub(baseOffset);
         org.joml.Vector3f itemP = new org.joml.Vector3f(lowerP).add(diff);
         item.setAnimOffset(itemP, r);

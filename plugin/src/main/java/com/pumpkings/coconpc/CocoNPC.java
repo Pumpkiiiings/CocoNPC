@@ -35,6 +35,10 @@ public class CocoNPC extends JavaPlugin {
    AnimationManager animationManager;
    AnimatorTask animatorTask;
    com.pumpkings.coconpc.core.npc.selection.GizmoManager gizmoManager;
+   com.pumpkings.coconpc.core.mob.MobRegistry mobRegistry;
+   com.pumpkings.coconpc.core.mob.MobTicker mobTicker;
+   com.pumpkings.coconpc.core.mob.MobDefinitionLoader mobDefinitionLoader;
+   com.pumpkings.coconpc.core.mob.MobTextureService mobTextureService;
    public boolean hasNewUpdate = false;
 
    public void onEnable() {
@@ -49,6 +53,9 @@ public class CocoNPC extends JavaPlugin {
       this.animationManager.loadAnimations();
       this.animatorTask = new AnimatorTask(this);
       this.animatorTask.start();
+      this.loadMobs();
+      this.mobRegistry.bootstrap();
+      this.mobTicker.start();
       this.registry.loadAllPersistedNpcs();
 
       for (World world : Bukkit.getWorlds()) {
@@ -67,6 +74,15 @@ public class CocoNPC extends JavaPlugin {
       }
       if (this.animatorTask != null) {
          this.animatorTask.stop();
+      }
+      if (this.mobTicker != null) {
+         this.mobTicker.stop();
+      }
+      if (this.mobRegistry != null) {
+         this.mobRegistry.shutdown();
+      }
+      if (this.mobTextureService != null) {
+         this.mobTextureService.shutdown();
       }
       if (this.registry != null && this.registry.getNpcs() != null) {
          for (com.pumpkings.coconpc.core.npc.NpcEntity npc : this.registry.getNpcs().values()) {
@@ -102,6 +118,28 @@ public class CocoNPC extends JavaPlugin {
       this.animationManager = new AnimationManager(this);
       this.packetEngine = new com.pumpkings.coconpc.core.packet.CocoPacketEngine(this);
       this.gizmoManager = new com.pumpkings.coconpc.core.npc.selection.GizmoManager(this);
+      this.mobRegistry = new com.pumpkings.coconpc.core.mob.MobRegistry(this);
+      this.mobTicker = this.mobRegistry.getTicker();
+      this.mobDefinitionLoader = new com.pumpkings.coconpc.core.mob.MobDefinitionLoader(this);
+      this.mobTextureService = new com.pumpkings.coconpc.core.mob.MobTextureService(this);
+      this.mobTextureService.loadCache();
+   }
+
+   /**
+    * Loads every .bbmodel definition and starts generating their textures in
+    * the background. Definitions must exist before mobRegistry.bootstrap() so
+    * persisted drivers can be restored.
+    */
+   public void loadMobs() {
+      if (this.mobDefinitionLoader == null || this.mobTextureService == null) return;
+      java.util.List<com.pumpkings.coconpc.core.mob.MobDefinition> definitions =
+              this.mobDefinitionLoader.load();
+      this.mobRegistry.replaceDefinitions(definitions);
+      this.mobTextureService.reload(definitions);
+   }
+
+   public void reloadMobs() {
+      loadMobs();
    }
 
    public void initCommands() {
@@ -117,6 +155,8 @@ public class CocoNPC extends JavaPlugin {
       this.getServer().getPluginManager().registerEvents(new NpcInteractListener(this), this);
       this.getServer().getPluginManager().registerEvents(new WorldLoadListener(this), this);
       this.getServer().getPluginManager().registerEvents(new ConnectionListener(this), this);
+      this.getServer().getPluginManager().registerEvents(
+              new com.pumpkings.coconpc.core.mob.MobListener(this, this.mobRegistry), this);
    }
 
    public void loadConfigs() {
@@ -175,5 +215,21 @@ public class CocoNPC extends JavaPlugin {
 
    public com.pumpkings.coconpc.core.npc.selection.GizmoManager getGizmoManager() {
       return this.gizmoManager;
+   }
+
+   public com.pumpkings.coconpc.core.mob.MobRegistry getMobRegistry() {
+      return this.mobRegistry;
+   }
+
+   public com.pumpkings.coconpc.core.mob.MobTicker getMobTicker() {
+      return this.mobTicker;
+   }
+
+   public com.pumpkings.coconpc.core.mob.MobDefinitionLoader getMobDefinitionLoader() {
+      return this.mobDefinitionLoader;
+   }
+
+   public com.pumpkings.coconpc.core.mob.MobTextureService getMobTextureService() {
+      return this.mobTextureService;
    }
 }

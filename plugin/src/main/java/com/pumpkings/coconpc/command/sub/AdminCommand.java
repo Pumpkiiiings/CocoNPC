@@ -18,6 +18,7 @@ public class AdminCommand extends SubCommand {
             plugin.getMineskinService().preloadSkins(player);
         } else if (subcommand.equals("reload")) {
             plugin.loadConfigurations();
+            plugin.getRegistry().reloadAllNpcs();
             plugin.getMineskinService().rebuildClient();
             plugin.getUtils().resetFloodgateCache();
             Message.RELOAD_SUCCESS.send(plugin, player);

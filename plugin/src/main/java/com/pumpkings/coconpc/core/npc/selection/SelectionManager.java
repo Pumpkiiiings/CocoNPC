@@ -2,6 +2,7 @@ package com.pumpkings.coconpc.core.npc.selection;
 
 import com.pumpkings.coconpc.CocoNPC;
 import com.pumpkings.coconpc.core.config.Message;
+import com.pumpkings.coconpc.core.mob.CustomMob;
 import com.pumpkings.coconpc.core.npc.NpcEntity;
 import com.pumpkings.coconpc.menu.EditorTarget;
 import org.apache.commons.lang.WordUtils;
@@ -21,6 +22,7 @@ public class SelectionManager {
     private final Map<UUID, EditorTarget> manualRotate = new ConcurrentHashMap<>();
     private final Map<UUID, NpcEntity> manualHologramAdd = new ConcurrentHashMap<>();
     private final Map<UUID, NpcEntity> manualHologramBg = new ConcurrentHashMap<>();
+    private final Map<UUID, CustomMob> manualMobAction = new ConcurrentHashMap<>();
     private final java.util.Set<UUID> pendingSetKey = ConcurrentHashMap.newKeySet();
 
     public SelectionManager(CocoNPC plugin) {
@@ -90,6 +92,7 @@ public class SelectionManager {
         manualRotate.remove(id);
         manualHologramAdd.remove(id);
         manualHologramBg.remove(id);
+        manualMobAction.remove(id);
 
         pendingSetKey.remove(id);
     }
@@ -159,6 +162,20 @@ public class SelectionManager {
 
     public NpcEntity consumeHologramBg(Player player) {
         return manualHologramBg.remove(player.getUniqueId());
+    }
+
+    public void beginMobAction(Player player, CustomMob mob) {
+        if (player != null && mob != null) {
+            manualMobAction.put(player.getUniqueId(), mob);
+        }
+    }
+
+    public boolean hasPendingMobAction(Player player) {
+        return player != null && manualMobAction.containsKey(player.getUniqueId());
+    }
+
+    public CustomMob consumeMobAction(Player player) {
+        return player == null ? null : manualMobAction.remove(player.getUniqueId());
     }
 
     public void scroll(Player player, boolean right) {

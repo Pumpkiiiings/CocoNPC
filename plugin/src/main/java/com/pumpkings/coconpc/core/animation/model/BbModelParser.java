@@ -20,6 +20,17 @@ public class BbModelParser {
             BlockbenchModel model = GSON.fromJson(reader, BlockbenchModel.class);
             if (model == null || model.animations == null) return parsedAnimations;
 
+            // Blockbench 5.0: animator names may be missing, so resolve them
+            // through the groups array using the animator uuid key.
+            Map<String, String> namesByUuid = new HashMap<>();
+            if (model.groups != null) {
+                for (BlockbenchModel.Group group : model.groups) {
+                    if (group != null && group.uuid != null && group.name != null) {
+                        namesByUuid.putIfAbsent(group.uuid, group.name);
+                    }
+                }
+            }
+
             for (BlockbenchModel.Animation bbAnim : model.animations) {
                 if (bbAnim.name == null || bbAnim.animators == null) continue;
 
@@ -31,7 +42,13 @@ public class BbModelParser {
 
                 for (Map.Entry<String, BlockbenchModel.Animator> entry : bbAnim.animators.entrySet()) {
                     BlockbenchModel.Animator animator = entry.getValue();
-                    if (animator.keyframes == null) continue;
+                    if (animator == null || animator.keyframes == null) continue;
+
+                    String boneName = animator.name;
+                    if (boneName == null || boneName.isBlank()) {
+                        boneName = namesByUuid.get(entry.getKey());
+                    }
+                    if (boneName == null || boneName.isBlank()) continue;
 
                     TreeMap<Float, Animation.Keyframe> rotFrames = new TreeMap<>();
                     TreeMap<Float, Animation.Keyframe> posFrames = new TreeMap<>();
@@ -58,7 +75,7 @@ public class BbModelParser {
                     }
 
                     if (!rotFrames.isEmpty() || !posFrames.isEmpty()) {
-                        bones.put(animator.name, new Animation.Bone(rotFrames, posFrames));
+                        bones.put(boneName, new Animation.Bone(rotFrames, posFrames));
                     }
                 }
 
